@@ -1,4 +1,3 @@
-
 ## find the lambda.min and lambda.1se of a cv.
 findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NULL) {
 #  if (missing(cv1)) cv1 <<- cv(dat=dat, lambdaseq = lambdaseq, lambda2seq = lambda2seq, adapt = adapt)
@@ -162,14 +161,18 @@ excoefm <- function(dat) {
 
 ## input the type of data to be simulated, simulate a group of data, gives output
 outfct <- function (setting="small", lambda2seq) {
-  coef1 <- crtcoef(P=12,nz=4)
-  Lmatrix1 <- crtLmat(P=12,nz=4)
-  coef2 <- crtcoef(P=70,nz=10,coef1=c(0.5, -1.2, 1))
-  Lmatrix2 <- crtLmat(P=70,nz=10)
+  coef <- switch(setting,
+                 "small" = crtcoef(P=12,nz=4),
+                 "large" = crtcoef(P=70,nz=10,coef1=c(0.5, -1.2, 1))
+    )
+  Lmatrix <- switch(setting,
+                    "small" = crtLmat(P=12,nz=4),
+                    "large" = crtLmat(P=70,nz=10)
+    )
   
-  dat <- switch(setting,
-                "small" = multinom.simdata(nobs = 200, P = 12, K = 4, coef = coef1, Lmatrix = Lmatrix1),
-                "large" = multinom.simdata(nobs = 200, P = 70, K = 4, coef = coef2, Lmatrix = Lmatrix2)
+  dat <<- switch(setting,
+                "small" = multinom.simdata(nobs = 200, P = 12, K = 4, coef = coef, Lmatrix = Lmatrix),
+                "large" = multinom.simdata(nobs = 200, P = 70, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
   coef <- coefsdat(dat, lambda2seq=lambda2seq)
   crite <- getcrt(coef=coef, coef0=dat$coef)
