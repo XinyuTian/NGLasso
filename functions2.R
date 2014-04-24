@@ -175,9 +175,11 @@ outfct <- function (setting="small", lambda2seq) {
                 "large" = multinom.simdata(nobs = 200, P = 70, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
   coef <- coefsdat(dat, lambda2seq=lambda2seq)
-  crite <- getcrt(coef=coef, coef0=dat$coef)
+  coef1 <<- coef
+  crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting)
   return(crite)
 }
+
 
 ## the function generates a list containing 7 coefs
 coefsdat <- function(dat, lambda2seq) {
@@ -195,16 +197,24 @@ coefsdat <- function(dat, lambda2seq) {
 
 ## input a list of coefs and the true value coef0
 ## generate 2 criteria ---- MSE of coefficients and FNR/FPR for variable selection
-getcrt <- function(coef, coef0) {
+getcrt <- function(coef, coef0, setting) {
   noc <- length(coef0)
   mse <- lapply(coef, function(c1) sum((c1-coef0)^2) / noc) 
   ind <- lapply(coef, nvar)
-  nTP <- lapply(ind, function(XX) sum(!is.na(match(c(2,3,4,5,6,7,8,9,10,11), XX))))
-  nFN <- lapply(nTP, function(XX) 10 - XX)
+  ind0 <- switch(setting,
+                 "small" = c(2:5),
+                 "large" = c(2:11)
+    )
+  P <- switch(setting,
+              "small" = 12,
+              "large" = 70
+  )
+  nz <- length(ind0)
+  nTP <- lapply(ind, function(XX) sum(!is.na(match(ind0, XX))))
+  nFN <- lapply(nTP, function(XX) nz - XX)
   nFP <- mapply(function(xx, yy) length(xx) - yy - 1, ind, nTP)
-  nTN <- lapply(nFP, function(XX) 60 - XX)
-  return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/60, FNR = as.numeric(nFN)/10))
+  nTN <- lapply(nFP, function(XX) P-nz - XX)
+  return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/(P-nz), FNR = as.numeric(nFN)/nz))
 }
-
 
 
