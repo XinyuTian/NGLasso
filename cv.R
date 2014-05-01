@@ -22,17 +22,14 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
   while(sane.permutation < 1){
     permutation <- sample(seq(nobs))
     boundaries <- numeric(k-1)
-    boundaries[1] <- ceiling(nobs / k)
-    for(i in seq(2, length(boundaries))){
+    for(i in seq(1, length(boundaries))){
       boundaries[i] <- ceiling(nobs * i / k)
     }
-    boundaries <- c(0, boundaries)
-    boundaries <- c(boundaries, nobs)
+    boundaries <- c(0, boundaries, nobs)
     cvinds <- list(); length(cvinds) <- k
     for(i in seq(k)){
       cvinds[[i]] <- permutation[seq((boundaries[i] + 1), boundaries[i+1])]
     }
-    cvinds<<-cvinds
     
     ## test if all columns of y have samples in each training set
     sane.flag <- numeric(k)
@@ -42,7 +39,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
       if(all(colSums(daty.test) >= 1)) sane.flag[i] <- T
     }
     if(all(sane.flag == T)) sane.permutation <- 1  else sane.permutation <- sane.permutation-1
-    if(sane.permutation < -20) break("data cannot be divided")
+    if(sane.permutation < -20) stop("data cannot be divided")
   }
   
   newdata <- list(); length(newdata) <- k
@@ -58,7 +55,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
   
   for (l in 1:n2) {
     lambda2 <- lambda2seq[l]
-    
+    # initialization
     i <- 1
     lambda1 <- lambdaseq[1]
     df <- 0
@@ -72,7 +69,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
     while(i <= n1) {      
       ## a function doing the j-th cv, returns a list of coef with length = k
       cvcore <- function(j){
-        cvdat <- list(y = dat$y[-cvinds[[j]], ],
+        cvdat <- list(y = dat$y[-cvinds[[j]], , drop = F],
                       x = dat$x[-cvinds[[j]], , drop = F],
                       Lmatrix = dat$Lmatrix, pwt = dat$pwt)
         coef <- fista(dat=cvdat, tuning=list(lambda1,lambda2), coef.init = coef.init,
@@ -100,21 +97,18 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
           etaj <- update.eta(dat = newdata[[j]], coef = coefj, weights = rep(1,nobsj))
           muj <- update.mu(etaj)
           
-          if (type == "deviance") {
-            logl[j] <- loglik(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
-            dev[i, j] <- 2*(loglik(y = newdata[[j]]$y, mu = newdata[[j]]$y,
-                                   weights = rep(1,nobsj)) - logl[j])
-          }
-          if (type == "brier") brierscore[i, j] <- Brier(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
+          logl[j] <- loglik(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
+          dev[i, j] <- 2*(loglik(y = newdata[[j]]$y, mu = newdata[[j]]$y,
+                                 weights = rep(1,nobsj)) - logl[j])
+          brierscore[i, j] <- Brier(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
         } else {dev[i, j] <- NA; brierscore[i, j] <- NA}
-        
       }
-      print(paste("this is the ", i, "th iteration."))
+#      print(paste("this is the ", i, "th iteration."))
 #      cvlist[[l]][[i]] <- cvtemp
       newmean <- mean(brierscore[i, ], na.rm = TRUE)
       if (!is.na(newmean)) {
-        if ((oldmean-newmean) <= 0.01*newmean) ctl<-ctl+1 else ctl<-0 
-#        if (ctl > 35) {break; print(paste("break while loop at i = ", i))}
+        if ((oldmean-newmean) <= 0.005*newmean) ctl<-ctl+1 else ctl<-0 
+        if (ctl > 3) {break; print(paste("break while loop at i = ", i))}
         oldmean <-newmean
       }
       i <- i+1 
@@ -140,9 +134,8 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
   )
   
   return(list(mean = means, sd = sds, type = type, dfmax = dfmax, dfmin = dfmin, 
-              lambdaseq = lambdaseq, lambda2seq = lambda2seq))
+              lambdaseq = lambdaseq, lambda2seq = lambda2seq, mdev=mdev, sdev=sdev))
   
 }
-
 
 
