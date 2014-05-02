@@ -109,7 +109,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
       if (!is.na(newmean)) {
         if ((oldmean-newmean) <= 0.005*newmean) ctl<-ctl+1 else ctl<-0 
         if (ctl > 3) {break; print(paste("break while loop at i = ", i))}
-        oldmean <-newmean
+        if (oldmean != newmean) oldmean <-newmean
       }
       i <- i+1 
       lambda1 <- lambdaseq[i]

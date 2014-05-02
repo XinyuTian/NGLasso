@@ -55,7 +55,7 @@ getlambdamax <- function(dat, weights = NULL, threshold = F, refit = F)
 
 
 
-getlambdaseq <- function(lambdamax, ratio=0.91, scl=0.005) { 
+getlambdaseq <- function(lambdamax, ratio=0.95, scl=0.05) { 
   x <- lambdamax
   res <- integer() 
   while(x >= scl * lambdamax) { 
