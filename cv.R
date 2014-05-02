@@ -105,10 +105,10 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
 #      print(paste("this is the ", i, "th iteration."))
 #      cvlist[[l]][[i]] <- cvtemp
       newmean <- mean(brierscore[i, ], na.rm = TRUE)
-      if (!is.na(newmean)) {
+      if (!is.na(newmean) & abs(oldmean-newmean) > 1e-6) {
         if ((oldmean-newmean) <= 0.005*newmean) ctl<-ctl+1 else ctl<-0 
         if (ctl > 3) {break; print(paste("break while loop at i = ", i))}
-        if (abs(oldmean-newmean) > 1e-6) oldmean <-newmean
+        oldmean <-newmean
       }
       i <- i+1 
       lambda1 <- lambdaseq[i]
