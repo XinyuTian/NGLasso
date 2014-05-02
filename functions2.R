@@ -1,4 +1,5 @@
 ## find the lambda.min and lambda.1se of a cv.
+## if length(lambda2seq) > 1, choose the global minimum
 findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NULL) {
 #  if (missing(cv1)) cv1 <<- cv(dat=dat, lambdaseq = lambdaseq, lambda2seq = lambda2seq, adapt = adapt)
   lambdaseq <- cv1$lambdaseq
@@ -6,6 +7,7 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   n2 <- length(lambda2seq)
   indmin <- lapply(cv1$mean, which.min)
   meanmin <- lapply(cv1$mean, min)
+  indmmin <- which.min(unlist(meanmin))
   minsd <- sapply(seq(n2), function(i) cv1$sd [[i]] [indmin[[i]]])
   m1se <- mapply("+", meanmin, minsd)
   lambda.min <- lapply(indmin, function(i) lambdaseq[i])
@@ -13,7 +15,7 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   ind1se <- lapply(mdiff, function(v) which.min(abs(v)))
   lambda.1se <- lapply(ind1se, function(i) lambdaseq[i])
   
-  return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda2seq=lambda2seq))
+  return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda2seq=lambda2seq, indmmin = indmmin))
 }
 
 ## return all coefs for each combination of lambda1 and lambda2 based on fista
@@ -135,6 +137,7 @@ excoefg <- function(dat, type="1se") {
 ## extract coef from fista
 ## calls findlambda to get the lambda.min or lambda.1es
 ## returns a list of length n2, in each element contains (df, coef,) mse
+## indmmin indicates which lambda2 to use
 excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
   cv1 <- cv(dat=dat, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
@@ -142,12 +145,13 @@ excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
                        "min" = flambda$lambda.min,
                        "1se" = flambda$lambda.1se
   )
+  indmmin <- flambda$indmmin
   n2 <- length(lambda2seq)
   lambda1seq <- unlist(lambda1seq)
   coefseq <- list()
   if (n2 != 1) warning("only the first lambda2 is used")
-  lambda2 <- lambda2seq[1]
-  lambda1 <- lambda1seq[1]
+  lambda2 <- lambda2seq[indmmin]
+  lambda1 <- lambda1seq[indmmin]
   coef0 <- fista(dat=dat, tuning=list(lambda1,lambda2), fitype=fitype)$coef
   return(coef0)
 }
