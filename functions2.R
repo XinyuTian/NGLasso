@@ -165,7 +165,7 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (setting="small", lambda2seq, type="min") {
+outfct <- function (setting="small", lambda2seq, type="1se") {
   coef <- switch(setting,
                  "small" = crtcoef(P=12,nz=4),
                  "large" = crtcoef(P=70,nz=10,coef1=c(0.5, -1.2, 1))
