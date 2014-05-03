@@ -5,7 +5,7 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   lambdaseq <- cv1$lambdaseq
   lambda2seq <- cv1$lambda2seq
   n2 <- length(lambda2seq)
-  indmin <- lapply(cv1$mean, function(xx) max(which(xx==min(xx))))
+  indmin <- lapply(cv1$mean, which.min)
   meanmin <- lapply(cv1$mean, min)
   indmmin <- which.min(unlist(meanmin))
   minsd <- sapply(seq(n2), function(i) cv1$sd [[i]] [indmin[[i]]])
