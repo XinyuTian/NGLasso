@@ -76,7 +76,7 @@ multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix,
   return(dat)
 }
 
-crtcoef <- function (coef0 = c(0.5, 1.0, -2), coef1 = c(2, -1.5, 1), P, nz) {
+crtcoef <- function (coef0 = c(-0.5, 0.8, -1), coef1 = c(2, -1.5, 1), P, nz) {
   coef=numeric(0)
   sapply(seq(nz), function (x) coef <<- cbind(coef, coef1))
   sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
