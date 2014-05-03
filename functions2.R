@@ -139,6 +139,7 @@ excoefg <- function(dat, type="1se") {
 ## returns a list of length n2, in each element contains (df, coef,) mse
 ## indmmin indicates which lambda2 to use
 excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
+  if(is.null(fitype)) fitype <- "ordinary"
   if (fitype == "refit") type="min"
   cv1 <- cv(dat=dat, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
