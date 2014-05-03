@@ -151,7 +151,6 @@ excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
   n2 <- length(lambda2seq)
   lambda1seq <- unlist(lambda1seq)
   coefseq <- list()
-  if (n2 != 1) warning("only the first lambda2 is used")
   lambda2 <- lambda2seq[indmmin]
   lambda1 <- lambda1seq[indmmin]
   coef0 <- fista(dat=dat, tuning=list(lambda1,lambda2), fitype=fitype)$coef
@@ -166,7 +165,7 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (setting="small", lambda2seq) {
+outfct <- function (setting="small", lambda2seq, type="min") {
   coef <- switch(setting,
                  "small" = crtcoef(P=12,nz=4),
                  "large" = crtcoef(P=70,nz=10,coef1=c(0.5, -1.2, 1))
@@ -180,24 +179,23 @@ outfct <- function (setting="small", lambda2seq) {
                 "small" = multinom.simdata(nobs = 200, P = 12, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "large" = multinom.simdata(nobs = 200, P = 70, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
-  coef <- coefsdat(dat, lambda2seq=lambda2seq)
+  coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type)
   coef1 <<- coef
   crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting)
   return(crite)
 }
 
-
 ## the function generates a list containing 7 coefs
-coefsdat <- function(dat, lambda2seq) {
+coefsdat <- function(dat, lambda2seq, type=NULL) {
   coef <- list(7)
   coef[[1]] <- excoefm(dat)
   gfit <- excoefg(dat)
   coef[[2]] <- gfit$coefugp
   coef[[3]] <- gfit$coefgrp
-  coef[[4]] <- excoeff(dat=dat, lambda2seq=lambda2seq)
-  coef[[5]] <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq)
-  coef[[6]] <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq)
-  coef[[7]] <- excoeff(dat=dat, fitype="adarf", lambda2seq=lambda2seq)
+  coef[[4]] <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type)
+  coef[[5]] <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type)
+  coef[[6]] <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type)
+  coef[[7]] <- excoeff(dat=dat, fitype="adarf", lambda2seq=lambda2seq, type=type)
   return(coef)
 }
 
@@ -222,5 +220,4 @@ getcrt <- function(coef, coef0, setting) {
   nTN <- lapply(nFP, function(XX) P-nz - XX)
   return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/(P-nz), FNR = as.numeric(nFN)/nz))
 }
-
 
