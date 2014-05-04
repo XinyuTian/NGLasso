@@ -139,4 +139,8 @@ nvar <- function(coef){
 }
 
 
-
+## find the mode of a sequence, that is, the most frequent element
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
