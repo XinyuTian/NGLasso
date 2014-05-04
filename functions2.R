@@ -195,7 +195,7 @@ coefsdat <- function(dat, lambda2seq, type=NULL) {
   coef[[4]] <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type)
   coef[[5]] <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type)
   coef[[6]] <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type)
-  coef[[7]] <- excoeff(dat=dat, fitype="adarf", lambda2seq=lambda2seq, type=type)
+  coef[[7]] <- excoeff(dat=dat, fitype="adprf", lambda2seq=lambda2seq, type=type)
   return(coef)
 }
 
