@@ -5,15 +5,20 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   lambdaseq <- cv1$lambdaseq
   lambda2seq <- cv1$lambda2seq
   n2 <- length(lambda2seq)
-  indmin <- lapply(cv1$mean, which.min)
-  meanmin <- lapply(cv1$mean, min)
+  if (fitype == "refit" | fitype == "adprf") {
+    meanmin <- lapply(cv1$mean, Mode)
+  } else  meanmin <- lapply(cv1$mean, min)
   indmmin <- which.min(unlist(meanmin))
-  minsd <- sapply(seq(n2), function(i) cv1$sd [[i]] [indmin[[i]]])
-  m1se <- mapply("+", meanmin, minsd)
-  lambda.min <- lapply(indmin, function(i) lambdaseq[i])
-  mdiff <- mapply("-", cv1$mean, m1se, SIMPLIFY = FALSE)
-  ind1se <- lapply(mdiff, function(v) which.min(abs(v)))
-  lambda.1se <- lapply(ind1se, function(i) lambdaseq[i])
+  if (fitype == "refit" | fitype == "adprf") {
+    indmin <-  median(which(cv1$mean[[indmmin]] == meanmin[[indmmin]]))
+  } else    indmin <- which.min(cv1$mean[[indmmin]])
+  
+  minsd <- cv1$sd [[indmmin]] [indmin]
+  m1se <- meanmin[[indmmin]] + minsd
+  lambda.min <- lambdaseq[indmin]
+  mdiff <- cv1$mean[[indmmin]] - m1se
+  ind1se <- which.min(abs(mdiff))
+  lambda.1se <- lambdaseq[ind1se]
   
   return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda2seq=lambda2seq, indmmin = indmmin))
 }
@@ -140,19 +145,15 @@ excoefg <- function(dat, type="1se") {
 ## indmmin indicates which lambda2 to use
 excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
   if(is.null(fitype)) fitype <- "ordinary"
-  if (fitype == "refit") type="min"
+  if (fitype == "refit" | fitype == "adprf") type="min"
   cv1 <- cv(dat=dat, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
-  lambda1seq <- switch(type,
+  lambda1 <- switch(type,
                        "min" = flambda$lambda.min,
                        "1se" = flambda$lambda.1se
   )
   indmmin <- flambda$indmmin
-  n2 <- length(lambda2seq)
-  lambda1seq <- unlist(lambda1seq)
-  coefseq <- list()
   lambda2 <- lambda2seq[indmmin]
-  lambda1 <- lambda1seq[indmmin]
   coef0 <- fista(dat=dat, tuning=list(lambda1,lambda2), fitype=fitype)$coef
   return(coef0)
 }
