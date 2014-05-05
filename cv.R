@@ -1,3 +1,4 @@
+
 cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fitype = NULL) {
   
   if(k < 3) stop("'less than 3'-fold crossvalidation not supported")
@@ -45,8 +46,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
   for(j in seq(k))  newdata[[j]] <- list(y = dat$y[cvinds[[j]], ], x = dat$x[cvinds[[j]], ])
   
 #  cvlist <- list(); length(cvlist) <- n2
-  dfmax <- list(); length(dfmax) <- n2
-  dfmin <- list(); length(dfmin) <- n2
+  df <- list(); length(df) <- n2
   mdev <- list(); length(mdev) <- n2
   mbrierscore <- list(); length(mbrierscore) <- n2
   sdev <- list(); length(sdev) <- n2
@@ -65,7 +65,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
     # initial values
     ctl <- 0
     oldmean <- 100
-    while(i <= n1) {      
+    while(i <= n1 & df <= P/2) {      
       ## a function doing the j-th cv, returns a list of coef with length = k
       cvcore <- function(j){
         cvdat <- list(y = dat$y[-cvinds[[j]], , drop = F],
@@ -81,12 +81,10 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
       cvtemp <- lapply(seq(k), cvcore)
       
       ## df
-#      dfseq <- lapply(cvtemp, function(coef) sum(coef[1,]!=0)-1)
-#      dfseq <- unlist(unlist(dfseq))
-#      dfmax[[l]][i] <- max(dfseq)
-#      dfmin[[l]][i] <- min(dfseq)
-#      df <- max(dfseq)
-            
+      dfseq <- lapply(cvtemp, function(coef) length(nvar(coef))-1 )
+      dfseq <- unlist(unlist(dfseq))
+      df <- Mode(dfseq)
+      df[[l]][i] <- df
       logl <- c()
 
       for(j in seq(k)){
@@ -104,12 +102,12 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
       }
 #      print(paste("this is the ", i, "th iteration."))
 #      cvlist[[l]][[i]] <- cvtemp
-      newmean <- mean(brierscore[i, ], na.rm = TRUE)
-      if (!is.na(newmean) & abs(oldmean-newmean) > 0.005*newmean & i>10) {
-        if ((oldmean-newmean) <= 0.005*newmean) ctl<-ctl+1 else ctl<-0 
-        if (ctl > 3) {break; print(paste("break while loop at i = ", i))}
-        oldmean <-newmean
-      }
+#      newmean <- mean(brierscore[i, ], na.rm = TRUE)
+#      if (!is.na(newmean) & abs(oldmean-newmean) > 0.001*newmean & i>10) {
+#        if ((oldmean-newmean) <= 0.005*newmean) ctl<-ctl+1 else ctl<-0 
+#        if (ctl > 3) {break; print(paste("break while loop at i = ", i))}
+#        oldmean <-newmean
+#      }
       i <- i+1 
       lambda1 <- lambdaseq[i]
     }
@@ -132,7 +130,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
                 "brier" = sbrierscore
   )
   
-  return(list(mean = means, sd = sds, type = type, dfmax = dfmax, dfmin = dfmin, 
+  return(list(mean = means, sd = sds, type = type, df = df, 
               lambdaseq = lambdaseq, lambda2seq = lambda2seq, mdev=mdev, sdev=sdev))
   
 }
