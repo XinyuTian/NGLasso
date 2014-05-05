@@ -5,14 +5,15 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   lambdaseq <- cv1$lambdaseq
   lambda2seq <- cv1$lambda2seq
   n2 <- length(lambda2seq)
-  if (fitype == "refit" | fitype == "adprf") {
-    meanmin <- lapply(cv1$mean, Mode)
-  } else  meanmin <- lapply(cv1$mean, min)
+#  if (fitype == "refit" | fitype == "adprf") {
+#    meanmin <- lapply(cv1$mean, Mode)
+#  } else  meanmin <- lapply(cv1$mean, min)
+  meanmin <- lapply(cv1$mean, min)
   indmmin <- which.min(unlist(meanmin))
-  if (fitype == "refit" | fitype == "adprf") {
-    indmin <-  median(which(cv1$mean[[indmmin]] == meanmin[[indmmin]]))
-  } else    indmin <- which.min(cv1$mean[[indmmin]])
-  
+#  if (fitype == "refit" | fitype == "adprf") {
+#    indmin <-  median(which(cv1$mean[[indmmin]] == meanmin[[indmmin]]))
+#  } else    indmin <- which.min(cv1$mean[[indmmin]])
+  indmin <- which.min(cv1$mean[[indmmin]])
   minsd <- cv1$sd [[indmmin]] [indmin]
   m1se <- meanmin[[indmmin]] + minsd
   lambda.min <- lambdaseq[indmin]
@@ -145,7 +146,7 @@ excoefg <- function(dat, type="1se") {
 ## indmmin indicates which lambda2 to use
 excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
   if(is.null(fitype)) fitype <- "ordinary"
-  if (fitype == "refit" | fitype == "adprf") type="min"
+#  if (fitype == "refit" | fitype == "adprf") type="min"
   cv1 <- cv(dat=dat, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
   lambda1 <- switch(type,
