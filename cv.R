@@ -57,7 +57,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
     # initialization
     i <- 1
     lambda1 <- lambdaseq[1]
-    df <- 0
+    dftemp <- 0
 #    cvlist[[l]] <- list()
     dev <-  matrix(nrow = n1, ncol = k)
     brierscore <-  matrix(nrow = n1, ncol = k)
@@ -65,7 +65,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
     # initial values
     ctl <- 0
     oldmean <- 100
-    while(i <= n1 & df <= P/2) {      
+    while(i <= n1 & dftemp <= P/2) {      
       ## a function doing the j-th cv, returns a list of coef with length = k
       cvcore <- function(j){
         cvdat <- list(y = dat$y[-cvinds[[j]], , drop = F],
@@ -83,8 +83,8 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
       ## df
       dfseq <- lapply(cvtemp, function(coef) length(nvar(coef))-1 )
       dfseq <- unlist(unlist(dfseq))
-      df <- Mode(dfseq)
-      df[[l]][i] <- df
+      dftemp <- Mode(dfseq)
+      df[[l]][i] <- dftemp
       logl <- c()
 
       for(j in seq(k)){
