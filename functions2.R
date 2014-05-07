@@ -100,6 +100,17 @@ slcmod <- function (dat, flambda, lambda1seq=NULL, lambda2seq=NULL,
   return(out)
 }
 
+## prediction
+pred <- function(newdat, coef0, weights=NULL) {
+  y <- newdat$y
+  if (is.null(weights)) weights <- rep(1, nrow(y))
+  eta <- update.eta(newdat, coef0, weights=weights)
+  mu <- update.mu(eta)
+  yc <- cbind(y,1-rowSums(y))
+  muc <- cbind(mu,1-rowSums(mu))
+  predev <- apply(yc-muc, 1, function(u) norm(as.matrix(u), type="F"))
+  return(predev)
+}
 
 
 ## exstract coef from cv.glmnet fit
