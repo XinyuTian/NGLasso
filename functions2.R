@@ -180,20 +180,22 @@ excoefm <- function(dat) {
 ## input the type of data to be simulated, simulate a group of data, gives output
 outfct <- function (setting="small", lambda2seq, type="1se") {
   coef <- switch(setting,
-                 "small" = crtcoef(P=12,nz=4),
-                 "large" = crtcoef(P=70,nz=10,coef1=c(0.5, -1.2, 1))
+                 "small" = crtcoef(P=20,nz=4),
+                 "medium" = crtcoef(P=100,nz=10),
+                 "large" = crtcoef(P=200,nz=10,coef1=c(0.5, -1.2, 1))
     )
   Lmatrix <- switch(setting,
-                    "small" = crtLmat(P=12,nz=4),
-                    "large" = crtLmat(P=70,nz=10)
+                    "small" = crtLmat(P=20,nz=4),
+                    "medium" = crtLmat(P=100,nz=10),
+                    "large" = crtLmat(P=200,nz=10)
     )
   
   dat <<- switch(setting,
-                "small" = multinom.simdata(nobs = 200, P = 12, K = 4, coef = coef, Lmatrix = Lmatrix),
-                "large" = multinom.simdata(nobs = 200, P = 70, K = 4, coef = coef, Lmatrix = Lmatrix)
+                "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
+                "medium" = multinom.simdata(nobs = 200, P = 100, K = 10, coef = coef, Lmatrix = Lmatrix),
+                "large" = multinom.simdata(nobs = 200, P = 200, K = 10, coef = coef, Lmatrix = Lmatrix)
   )
   coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type)
-  coef1 <<- coef
   crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting)
   return(crite)
 }
@@ -220,11 +222,13 @@ getcrt <- function(coef, coef0, setting) {
   ind <- lapply(coef, nvar)
   ind0 <- switch(setting,
                  "small" = c(2:5),
+                 "medium" = c(2:11),
                  "large" = c(2:11)
     )
   P <- switch(setting,
-              "small" = 12,
-              "large" = 70
+              "small" = 20,
+              "medium" = 100,
+              "large" = 200
   )
   nz <- length(ind0)
   nTP <- lapply(ind, function(XX) sum(!is.na(match(ind0, XX))))
