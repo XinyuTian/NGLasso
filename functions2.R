@@ -190,10 +190,10 @@ outfct <- function (setting="small", lambda2seq, type="1se") {
                     "large" = crtLmat(P=200,nz=10)
     )
   
-  dat <<- switch(setting,
+  dat <- switch(setting,
                 "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
-                "medium" = multinom.simdata(nobs = 200, P = 100, K = 10, coef = coef, Lmatrix = Lmatrix),
-                "large" = multinom.simdata(nobs = 200, P = 200, K = 10, coef = coef, Lmatrix = Lmatrix)
+                "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
+                "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
   coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type)
   crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting)
