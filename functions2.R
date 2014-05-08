@@ -106,10 +106,15 @@ pred <- function(newdat, coef0, weights=NULL) {
   if (is.null(weights)) weights <- rep(1, nrow(y))
   eta <- update.eta(newdat, coef0, weights=weights)
   mu <- update.mu(eta)
-  yc <- as.vector(cbind(y,1-rowSums(y)))
-  muc <- as.vector(cbind(mu,1-rowSums(mu)))
-  predev <- norm(as.matrix(yc-muc), type="F")
-  return(predev)
+  yc <- cbind(y,1-rowSums(y))
+  muc <- cbind(mu,1-rowSums(mu))
+  yv <- as.vector(yc)
+  muv <- as.vector(muc)
+  predev <- norm(as.matrix(yv-muv), type="F")
+  yi <- apply(yc, 1, which.max)
+  mui <- apply(muc, 1, which.max)
+  accu <- sum(yi == mui)/nrow(y)
+  return(c(predev, accu))
 }
 
 
