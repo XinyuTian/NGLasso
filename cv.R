@@ -1,10 +1,11 @@
 
-cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fitype = NULL) {
+cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fitype = NULL) {
   
   if(k < 3) stop("'less than 3'-fold crossvalidation not supported")
   nobs <- nrow(dat$y)
   P <- ncol(dat$x) - 1
   Q <- ncol(dat$y)
+  if(is.null(dfmax)) dfmax <- P/2
   if(is.null(lambdaseq)) {
     lambdamax <- getlambdamax(dat=dat)
     lambdaseq <- getlambdaseq(lambdamax)
@@ -65,7 +66,7 @@ cv <- function(dat, k = 10, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fity
     # initial values
     ctl <- 0
     oldmean <- 100
-    while(i <= n1 & dftemp <= P/2) {      
+    while(i <= n1 & dftemp <= dfmax) {      
       ## a function doing the j-th cv, returns a list of coef with length = k
       cvcore <- function(j){
         cvdat <- list(y = dat$y[-cvinds[[j]], , drop = F],
