@@ -221,7 +221,7 @@ outfct <- function (setting="small", lambda2seq, type="1se") {
 coefsdat <- function(dat, lambda2seq, type=NULL, dfmax=NULL) {
   coef <- list(7)
   coef[[1]] <- excoefm(dat)
-  gfit <- excoefg(dat)
+  gfit <- excoefg(dat, type=type)
   coef[[2]] <- gfit$coefugp
   coef[[3]] <- gfit$coefgrp
   fit1 <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
@@ -263,6 +263,6 @@ getcrt <- function(coef, coef0, setting, predat) {
   brier <- predcrite0[,1]
   accu <- predcrite0[,2]
   return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/(P-nz), FNR = as.numeric(nFN)/nz,
-              FDR = as.numeric(nFP)/(P-nz-as.numeric(nFN)+as.numeric(nFP)), brier=brier, accuacy=accu))
+              FDR = as.numeric(nFP)/(nz-as.numeric(nFN)+as.numeric(nFP)), brier=brier, accuacy=accu))
 }
 
