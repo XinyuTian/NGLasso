@@ -172,7 +172,7 @@ excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1, dfmax=NULL) {
   indmmin <- flambda$indmmin
   lambda2 <- lambda2seq[indmmin]
   coef0 <- fista(dat=dat, tuning=list(lambda1,lambda2), fitype=fitype)$coef
-  return(coef0)
+  return(list(coef=coef0, ind=indmmin))
 }
 
 ## extract coef from multinom
@@ -210,9 +210,11 @@ outfct <- function (setting="small", lambda2seq, type="1se") {
                 "medium" = 50,
                 "large" = 50
   )
-  coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  coefs <- coefsdat(dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  coef <- coefs[[1]]
+  ind <- coefs[[2]]
   crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting, predat=predat)
-  return(crite)
+  return(c(crite, ind=list(ind)))
 }
 
 ## the function generates a list containing 7 coefs
@@ -222,11 +224,16 @@ coefsdat <- function(dat, lambda2seq, type=NULL, dfmax=NULL) {
   gfit <- excoefg(dat)
   coef[[2]] <- gfit$coefugp
   coef[[3]] <- gfit$coefgrp
-  coef[[4]] <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
-  coef[[5]] <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
-  coef[[6]] <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
-  coef[[7]] <- excoeff(dat=dat, fitype="adprf", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
-  return(coef)
+  fit1 <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  fit2 <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  fit3 <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  fit4 <- excoeff(dat=dat, fitype="adprf", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  coef[[4]] <- fit1[[1]]
+  coef[[5]] <- fit2[[1]]
+  coef[[6]] <- fit3[[1]]
+  coef[[7]] <- fit4[[1]]
+  ind <- c(fit1[[2]], fit2[[2]], fit3[[2]], fit4[[2]])
+  return(list(coef, ind))
 }
 
 ## input a list of coefs and the true value coef0
