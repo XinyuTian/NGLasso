@@ -227,7 +227,7 @@ coefsdat <- function(dat, lambda2seq, type=NULL) {
 ## input a list of coefs and the true value coef0
 ## generate 6 criteria ---- MSE of coefficients, FNR/FPR/FDR for variable selection,
 ## Brier score and prediction accuracy
-getcrt <- function(coef, coef0, setting) {
+getcrt <- function(coef, coef0, setting, predat) {
   noc <- length(coef0)
   mse <- lapply(coef, function(c1) sum((c1-coef0)^2) / noc) 
   ind <- lapply(coef, nvar)
@@ -246,6 +246,11 @@ getcrt <- function(coef, coef0, setting) {
   nFN <- lapply(nTP, function(XX) nz - XX)
   nFP <- mapply(function(xx, yy) length(xx) - yy - 1, ind, nTP)
   nTN <- lapply(nFP, function(XX) P-nz - XX)
-  return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/(P-nz), FNR = as.numeric(nFN)/nz))
+  predcrite <- lapply(coef, pred, newdat=predat)
+  predcrite0 <- do.call(rbind, predcrite)
+  brier <- predcrite0[,1]
+  accu <- predcrite0[,2]
+  return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/(P-nz), FNR = as.numeric(nFN)/nz,
+              FDR = as.numeric(nFP)/(P-nz-as.numeric(nFN)+as.numeric(nFP)), brier=brier, accuacy=accu))
 }
 
