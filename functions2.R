@@ -106,9 +106,9 @@ pred <- function(newdat, coef0, weights=NULL) {
   if (is.null(weights)) weights <- rep(1, nrow(y))
   eta <- update.eta(newdat, coef0, weights=weights)
   mu <- update.mu(eta)
-  yc <- cbind(y,1-rowSums(y))
-  muc <- cbind(mu,1-rowSums(mu))
-  predev <- apply(yc-muc, 1, function(u) norm(as.matrix(u), type="F"))
+  yc <- as.vector(cbind(y,1-rowSums(y)))
+  muc <- as.vector(cbind(mu,1-rowSums(mu)))
+  predev <- norm(as.matrix(yc-muc), type="F")
   return(predev)
 }
 
@@ -195,8 +195,13 @@ outfct <- function (setting="small", lambda2seq, type="1se") {
                 "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
+  predat <- switch(setting,
+                "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
+                "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
+                "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
+  )
   coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type)
-  crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting)
+  crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting, predat=predat)
   return(crite)
 }
 
@@ -215,7 +220,8 @@ coefsdat <- function(dat, lambda2seq, type=NULL) {
 }
 
 ## input a list of coefs and the true value coef0
-## generate 2 criteria ---- MSE of coefficients and FNR/FPR for variable selection
+## generate 6 criteria ---- MSE of coefficients, FNR/FPR/FDR for variable selection,
+## Brier score and prediction accuracy
 getcrt <- function(coef, coef0, setting) {
   noc <- length(coef0)
   mse <- lapply(coef, function(c1) sum((c1-coef0)^2) / noc) 
