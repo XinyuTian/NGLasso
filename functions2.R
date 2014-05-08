@@ -160,10 +160,10 @@ excoefg <- function(dat, type="1se") {
 ## calls findlambda to get the lambda.min or lambda.1es
 ## returns a list of length n2, in each element contains (df, coef,) mse
 ## indmmin indicates which lambda2 to use
-excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1) {
+excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1, dfmax=NULL) {
   if(is.null(fitype)) fitype <- "ordinary"
 #  if (fitype == "refit" | fitype == "adprf") type="min"
-  cv1 <- cv(dat=dat, fitype=fitype, lambda2seq=lambda2seq)
+  cv1 <- cv(dat=dat, k=5, dfmax=dfmax, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
   lambda1 <- switch(type,
                        "min" = flambda$lambda.min,
@@ -205,22 +205,27 @@ outfct <- function (setting="small", lambda2seq, type="1se") {
                 "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
-  coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type)
+  dfmax <- switch(setting,
+                "small" = 10,
+                "medium" = 50,
+                "large" = 50
+  )
+  coef <- coefsdat(dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting, predat=predat)
   return(crite)
 }
 
 ## the function generates a list containing 7 coefs
-coefsdat <- function(dat, lambda2seq, type=NULL) {
+coefsdat <- function(dat, lambda2seq, type=NULL, dfmax=NULL) {
   coef <- list(7)
   coef[[1]] <- excoefm(dat)
   gfit <- excoefg(dat)
   coef[[2]] <- gfit$coefugp
   coef[[3]] <- gfit$coefgrp
-  coef[[4]] <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type)
-  coef[[5]] <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type)
-  coef[[6]] <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type)
-  coef[[7]] <- excoeff(dat=dat, fitype="adprf", lambda2seq=lambda2seq, type=type)
+  coef[[4]] <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  coef[[5]] <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  coef[[6]] <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
+  coef[[7]] <- excoeff(dat=dat, fitype="adprf", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   return(coef)
 }
 
