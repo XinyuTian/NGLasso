@@ -132,7 +132,7 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
   )
   
   return(list(mean = means, sd = sds, type = type, df = df, 
-              lambdaseq = lambdaseq, lambda2seq = lambda2seq, mdev=mdev, sdev=sdev))
+              lambdaseq = lambdaseq, lambda2seq = lambda2seq, mdev=mdev, sdev=sdev, fold=k))
   
 }
 
