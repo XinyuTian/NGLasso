@@ -100,8 +100,8 @@ crtLmat <-  function (P, nz) {
 
 crtcoef1 <- function (K=4, P, nz) {
   coef <- matrix(0, K-1, nz)
-  sapply(seq(K-1), function(i) coef[i,] <<- sample(seq(0.4, 2,by=0.2), size=nz, replace=T)*sample(c(-1,1),1))
+  sapply(seq(K-1), function(i) coef[i,] <<- sample(seq(0.05, 0.5,by=0.05), size=nz, replace=T)*sample(c(-1,1),1))
   sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
-  coef <- cbind(sample(seq(-2, 2,by=0.2), size=K-1, replace=T), coef) 
+  coef <- cbind(sample(seq(-0.5, 0.5,by=0.05), size=K-1, replace=T), coef) 
   return(coef)
 }
