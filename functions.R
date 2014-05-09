@@ -124,12 +124,12 @@ obj <- function(coef1, dat, weights, tuning, penweights){
 getpenweights <- function(dat) {
   ## a function calls multinom to do one-variable regression
   oneml <- function(u) {
-    fit<-multinom(cbind(1-rowSums(dat$y), dat$y) ~ -1+u)
-    norm(as.matrix(summary(fit)$coefficients), type="F")
+    fit<-multinom(cbind(1-rowSums(dat$y), dat$y) ~ u)
+    norm(as.matrix(summary(fit)$coefficients[,2]), type="F")
   }
-  
   weights <- apply(dat$x[,-1], 2, oneml)
-  return (1/weights)
+  weights <- 1/weights
+  return (weights)
 }
 
 ## the indices of selected variables, degree of freedom
