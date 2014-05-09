@@ -26,19 +26,21 @@ repblockMatrixDiagonal <- function(matrix, rep) {
 #Lmatrix <- t(t(Lmatrix*di)*di)
 #Lmatrix <- Lmatrix %*% diag(1/diag(Lmatrix))
 
-multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix, 
+multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix, rho = 0.5, 
                              coef=NULL, weights = rep(1, nobs)){
-#  source(file="~/My R Files/NGLasso/functions.R")
+  #  source(file="~/My R Files/NGLasso/functions.R")
   if (is.null(coef)) {
     warning(paste("coefficients are missing, random values is used"))
-#    coef1 <- rnorm(K-1)
+    #    coef1 <- rnorm(K-1)
     coef1 <- c(2, -1.5, 1)
     coef <- cbind(coef1,coef1,coef1,coef1,matrix(0,nrow=K-1,ncol=8))
-#    coef <- cbind(coef1,coef1,coef1,coef1,coef1,coef1,coef1,coef1,coef1,coef1,matrix(0,nrow=K-1,ncol=60))
+    #    coef <- cbind(coef1,coef1,coef1,coef1,coef1,coef1,coef1,coef1,coef1,coef1,matrix(0,nrow=K-1,ncol=60))
     coef <- cbind(rnorm(K-1), coef)
   }
   Q <- nrow(coef)
-  X <- matrix(rnorm(nobs*P,mean=0), nrow=nobs, ncol=P)
+  cov <- getcov(rho=rho, P=P)
+  X <- mvrnorm(n = nobs, mu=rep(0,P), cov)
+  #  X <- matrix(rnorm(nobs*P,mean=0), nrow=nobs, ncol=P)
   X <- cbind(1,X)
 #  if(missing(Lmatrix)) Lmatrix <- diag(P); warning(paste("Lmatrix is missing, identity is used"))
   
