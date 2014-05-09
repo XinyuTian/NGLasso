@@ -136,7 +136,8 @@ getpenweights <- function(dat) {
 ## symmetric, diagonal is rho, geometric 
 getcov <- function(rho, P) {
   v1 <- c((P-1):0, 1:(P-1))
-  longv <- rho ^ v1
+  v2 <- sapply(v1, function(x) ifelse(x<1e-6,0,x))
+  longv <- rho ^ v2
   sapply(seq(P), function(i) longv[(P+1-i):(2*P-i)])
 }
 
