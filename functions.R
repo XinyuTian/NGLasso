@@ -132,6 +132,14 @@ getpenweights <- function(dat) {
   return (weights)
 }
 
+## generate coviance matrix of X
+## symmetric, diagonal is rho, geometric 
+getcov <- function(rho, P) {
+  v1 <- c(1:P, (P-1):1)
+  longv <- rho ^ v1
+  sapply(seq(P), function(i) longv[i:(i+P-1) ])
+}
+
 ## the indices of selected variables, degree of freedom
 nvar <- function(coef){
   ind <- apply(as.matrix(coef), 2, function(u) any(u!=0))
