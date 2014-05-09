@@ -181,29 +181,37 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (setting="small", lambda2seq, type="1se") {
-  coef <- switch(setting,
-                 "small" = crtcoef(P=20,nz=4),
-                 "medium" = crtcoef(P=100,nz=10),
-                 "large" = crtcoef(P=200,nz=10,coef1=c(0.5, -1.2, 1))
+outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
+  coef <- switch(coeftype,
+                 "ident" = switch(modsize,
+                                  "small" = crtcoef(P=20,nz=4),
+                                  "medium" = crtcoef(P=100,nz=10),
+                                  "large" = crtcoef(P=200,nz=10,coef1=c(0.5, -1.2, 1))
+                 ),
+                 "simil" = switch(modsize,
+                                  "small" = crtcoef1(P=20,nz=4),
+                                  "medium" = crtcoef1(P=100,nz=10),
+                                  "large" = crtcoef1(P=200,nz=10,coef1=c(0.5, -1.2, 1))
+                 ),
+                 "randm" = NULL
     )
-  Lmatrix <- switch(setting,
+  Lmatrix <- switch(modsize,
                     "small" = crtLmat(P=20,nz=4),
                     "medium" = crtLmat(P=100,nz=10),
                     "large" = crtLmat(P=200,nz=10)
     )
   
-  dat <- switch(setting,
+  dat <- switch(modsize,
                 "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
-  predat <- switch(setting,
+  predat <- switch(modsize,
                 "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
                 "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
-  dfmax <- switch(setting,
+  dfmax <- switch(modsize,
                 "small" = 10,
                 "medium" = 50,
                 "large" = 50
@@ -211,7 +219,7 @@ outfct <- function (setting="small", lambda2seq, type="1se") {
   coefs <- coefsdat(dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   coef <- coefs[[1]]
   ind <- coefs[[2]]
-  crite <- getcrt(coef=coef, coef0=dat$coef, setting=setting, predat=predat)
+  crite <- getcrt(coef=coef, coef0=dat$coef, modsize=modsize, predat=predat)
   return(c(crite, ind=list(ind)))
 }
 
@@ -237,16 +245,16 @@ coefsdat <- function(dat, lambda2seq, type=NULL, dfmax=NULL) {
 ## input a list of coefs and the true value coef0
 ## generate 6 criteria ---- MSE of coefficients, FNR/FPR/FDR for variable selection,
 ## Brier score and prediction accuracy
-getcrt <- function(coef, coef0, setting, predat) {
+getcrt <- function(coef, coef0, modsize, predat) {
   noc <- length(coef0)
   mse <- lapply(coef, function(c1) sum((c1-coef0)^2) / noc) 
   ind <- lapply(coef, nvar)
-  ind0 <- switch(setting,
+  ind0 <- switch(modsize,
                  "small" = c(2:5),
                  "medium" = c(2:11),
                  "large" = c(2:11)
     )
-  P <- switch(setting,
+  P <- switch(modsize,
               "small" = 20,
               "medium" = 100,
               "large" = 200
