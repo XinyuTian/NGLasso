@@ -5,23 +5,20 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   lambdaseq <- cv1$lambdaseq
   lambda2seq <- cv1$lambda2seq
   n2 <- length(lambda2seq)
-#  if (fitype == "refit" | fitype == "adprf") {
-#    meanmin <- lapply(cv1$mean, Mode)
-#  } else  meanmin <- lapply(cv1$mean, min)
   meanmin <- lapply(cv1$mean, min)
-  indmmin <- which.min(unlist(meanmin))
-#  if (fitype == "refit" | fitype == "adprf") {
-#    indmin <-  median(which(cv1$mean[[indmmin]] == meanmin[[indmmin]]))
-#  } else    indmin <- which.min(cv1$mean[[indmmin]])
-  indmin <- which.min(cv1$mean[[indmmin]])
-  minsd <- cv1$sd [[indmmin]] [indmin]
-  m1se <- meanmin[[indmmin]] + minsd
+  indl2 <- which.min(unlist(meanmin))
+  indmin <- which.min(cv1$mean[[indl2]])
+  minsd <- cv1$sd [[indl2]] [indmin]
+  m1se <- meanmin[[indl2]] + minsd
+  all.1se <- which(cv1$mean[[indl2]] < m1se)
   lambda.min <- lambdaseq[indmin]
-  mdiff <- cv1$mean[[indmmin]] - m1se
-  ind1se <- which.min(abs(mdiff))
-  lambda.1se <- lambdaseq[ind1se]
+  lambda.1se <- lambdaseq[min(all.1se)]
+  m1sea <- meanmin[[indl2]] + minsd/sqrt(cv1$fold)
+  all.1sea <- which(cv1$mean[[indl2]] < m1sea)
+  lambda.1sea <- lambdaseq[min(all.1sea)]
   
-  return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda2seq=lambda2seq, indmmin = indmmin))
+  return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda.1sea = lambda.1sea, 
+              lambda2seq=lambda2seq, indmmin = indl2))
 }
 
 ## return all coefs for each combination of lambda1 and lambda2 based on fista
@@ -167,7 +164,8 @@ excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1, dfmax=NULL) {
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
   lambda1 <- switch(type,
                        "min" = flambda$lambda.min,
-                       "1se" = flambda$lambda.1se
+                    "1sea" = flambda$lambda.1sea,
+                    "1se" = flambda$lambda.1se
   )
   indmmin <- flambda$indmmin
   lambda2 <- lambda2seq[indmmin]
