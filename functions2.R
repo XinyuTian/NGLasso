@@ -7,14 +7,15 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   n2 <- length(lambda2seq)
   meanmin <- lapply(cv1$mean, min)
   indl2 <- which.min(unlist(meanmin))
-  indmin <- which.min(cv1$mean[[indl2]])
+  cvm <- cv1$mean[[indl2]]
+  indmin <- which.min(cvm)
   minsd <- cv1$sd [[indl2]] [indmin]
-  m1se <- meanmin[[indl2]] + minsd
-  all.1se <- which(cv1$mean[[indl2]] < m1se)
+  mini <- meanmin[[indl2]]
+  all.1se <- which(cvm < (mini + minsd) & cvm > (mini - minsd))
   lambda.min <- lambdaseq[indmin]
   lambda.1se <- lambdaseq[min(all.1se)]
-  m1sea <- meanmin[[indl2]] + minsd/sqrt(cv1$fold)
-  all.1sea <- which(cv1$mean[[indl2]] < m1sea)
+  a1sesd <- minsd/sqrt(cv1$fold)
+  all.1sea <- which(cvm < (mini + a1sesd) & cvm > (mini - a1sesd))
   lambda.1sea <- lambdaseq[min(all.1sea)]
   
   return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda.1sea = lambda.1sea, 
@@ -121,9 +122,14 @@ pred <- function(newdat, coef0, weights=NULL) {
 excoefg <- function(dat, type="1se") {
   gc <- cv.glmnet(dat$x[,-1], y=cbind(dat$y,1-rowSums(dat$y)), 
                   family="multinomial", standardize=F, type.multinomial="grouped")
+  if(type=="1sea") {
+    cvm <- gc$cvm
+    a1sesd <- gc$cvsd[which.min(cvm)]/sqrt(10)
+  }
   li <- switch(type,
                "min" = which(gc$lambda == gc$lambda.min),
-               "1se" = which(gc$lambda == gc$lambda.1se)
+               "1se" = which(gc$lambda == gc$lambda.1se),
+               "1sea" = min(which(cvm < (min(cvm) + a1sesd) & cvm > (min(cvm) - a1sesd)))
   )
   g1 <- gc$glmnet.fit
   coef1 <-lapply(g1$beta, function(u) u[,li])
@@ -136,9 +142,14 @@ excoefg <- function(dat, type="1se") {
   
   g2 <- cv.glmnet(dat$x[,-1], y=cbind(dat$y,1-rowSums(dat$y)), 
                   family="multinomial", standardize=F)
+  if(type=="1sea") {
+    cvm2 <- g2$cvm
+    a1sesd2 <- g2$cvsd[which.min(cvm2)]/sqrt(10)
+  }
   li2 <- switch(type,
                 "min" = which(g2$lambda == g2$lambda.min),
-                "1se" = which(g2$lambda == g2$lambda.1se)
+                "1se" = which(g2$lambda == g2$lambda.1se),
+                "1sea" = min(which(cvm2 < (min(cvm2) + a1sesd2) & cvm2 > (min(cvm2) - a1sesd2)))
   )
   g3 <- g2$glmnet.fit
   coef3 <-lapply(g3$beta, function(u) u[,li2])
@@ -151,7 +162,6 @@ excoefg <- function(dat, type="1se") {
   
   out <- list(coefgrp = coef1, coefugp = coef3)
   return(out)
-}
 
 ## extract coef from fista
 ## calls findlambda to get the lambda.min or lambda.1es
