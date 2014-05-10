@@ -220,7 +220,8 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
   coef <- coefs[[1]]
   ind <- coefs[[2]]
   crite <- getcrt(coef=coef, coef0=dat$coef, modsize=modsize, predat=predat)
-  return(c(crite, ind=list(ind)))
+  al.crit <- c(crite, ind=list(ind))
+  return(list(criteria = al.crit, coef = coef, dat = dat))
 }
 
 ## the function generates a list containing 7 coefs
