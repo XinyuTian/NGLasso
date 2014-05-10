@@ -162,7 +162,7 @@ excoefg <- function(dat, type="1se") {
   
   out <- list(coefgrp = coef1, coefugp = coef3)
   return(out)
-
+}
 ## extract coef from fista
 ## calls findlambda to get the lambda.min or lambda.1es
 ## returns a list of length n2, in each element contains (df, coef,) mse
