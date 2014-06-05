@@ -11,11 +11,11 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   indmin <- which.min(cvm)
   minsd <- cv1$sd [[indl2]] [indmin]
   mini <- meanmin[[indl2]]
-  all.1se <- which(cvm < (mini + minsd) & cvm > (mini - minsd))
+  all.1se <- which(cvm < (mini + minsd))
   lambda.min <- lambdaseq[indmin]
   lambda.1se <- lambdaseq[min(all.1se)]
   a1sesd <- minsd/sqrt(cv1$fold)
-  all.1sea <- which(cvm < (mini + a1sesd) & cvm > (mini - a1sesd))
+  all.1sea <- which(cvm < (mini + a1sesd))
   lambda.1sea <- lambdaseq[min(all.1sea)]
   
   return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda.1sea = lambda.1sea, 
