@@ -14,11 +14,8 @@ findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NUL
   all.1se <- which(cvm < (mini + minsd))
   lambda.min <- lambdaseq[indmin]
   lambda.1se <- lambdaseq[min(all.1se)]
-  a1sesd <- minsd/sqrt(cv1$fold)
-  all.1sea <- which(cvm < (mini + a1sesd))
-  lambda.1sea <- lambdaseq[min(all.1sea)]
   
-  return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, lambda.1sea = lambda.1sea, 
+  return(list(lambda.min = lambda.min, lambda.1se = lambda.1se, 
               lambda2seq=lambda2seq, indmmin = indl2))
 }
 
@@ -174,7 +171,6 @@ excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1, dfmax=NULL) {
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
   lambda1 <- switch(type,
                        "min" = flambda$lambda.min,
-                    "1sea" = flambda$lambda.1sea,
                     "1se" = flambda$lambda.1se
   )
   indmmin <- flambda$indmmin
@@ -193,7 +189,7 @@ excoefm <- function(dat) {
 ## input the type of data to be simulated, simulate a group of data, gives output
 outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
   coef <- switch(coeftype,
-                 "ident" = switch(modsize,
+                 "ideal" = switch(modsize,
                                   "small" = crtcoef(P=20,nz=4),
                                   "medium" = crtcoef(P=100,nz=10),
                                   "large" = crtcoef(P=200,nz=10,coef1=c(0.5, -1.2, 1))
