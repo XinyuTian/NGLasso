@@ -7,7 +7,7 @@ loglik <- function(y, mu, weights,  ...){
   muc[which(muc <= 1e-6)] <- 1e-8
   muc[which(muc >= 1 - 1e-6)] <- 1 - 1e-8
   yc <- cbind(1 - rowSums(y), y)
-  logl <- sum(weights * yc * log(muc))  
+  logl <- sum(weights * yc * log(muc))/nrow(y)   
   return(logl)
 }
 ## ploglik:   penalized log likelihood
