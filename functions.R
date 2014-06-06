@@ -34,7 +34,7 @@ ploglik = function(y, mu, coef, weights, tuning, Lmatrix){
 ##            function. returns a q*p matrix that belongs to x. 
 ##            x must be an nobs*p matrix. y must be a nobs*q matrix.
 gradient = function(dat, mu, weights, ...){
-  grad <- crossprod((dat$y - mu), weights * dat$x)
+  grad <- crossprod((dat$y - mu), weights * dat$x)/nrow(dat$y)
   return(grad)
 }
 ## penalized gradient
