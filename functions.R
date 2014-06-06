@@ -134,10 +134,10 @@ getpenweights <- function(dat) {
 
 ## generate coviance matrix of X
 ## symmetric, diagonal is rho, geometric 
-getcov <- function(rho, P) {
+getcov <- function(rho, P, ctl=1e-6) {
   v1 <- c((P-1):0, 1:(P-1))
   longv <- rho ^ v1
-  longv1 <- sapply(longv, function(x) ifelse(x<1e-6,0,x))
+  longv1 <- sapply(longv, function(x) ifelse(x<ctl,0,x))
   sapply(seq(P), function(i) longv1[(P+1-i):(2*P-i)])
 }
 
