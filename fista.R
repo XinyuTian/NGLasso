@@ -11,7 +11,9 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   iter.count <- 0
   Lmatrix <- dat$Lmatrix
   if(is.null(fitype)) fitype <- "ordinary"
-  
+  if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
+  stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
+
   ## initializing
   if (is.null(coef.init)) coef.init <- matrix(1,nrow=K-1,ncol=P+1)
   coef.old1 <- coef.init
