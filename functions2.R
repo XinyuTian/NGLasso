@@ -113,20 +113,30 @@ pred <- function(newdat, coef0, weights=NULL) {
 }
 
 
-## exstract coef from cv.glmnet fit
-## returns a list, the first is grouped-penalized coef/mse, the second is unprouped
-## type could be "1se" or "min"
-excoefg <- function(dat, type="1se") {
+## exstract coef using cv.glmnet, "grouped" or "ungrouped"
+## returns a list, type=
+## "both"  list: 1-coef.min, 2-coef.1se
+## "min"   list: 1-coef.min
+## "1se"   list: 1-coef.1se
+excoefg <- function(dat, type=c("both", "min", "1se"), is.group="grouped") {
   gc <- cv.glmnet(dat$x[,-1], y=cbind(dat$y,1-rowSums(dat$y)), 
-                  family="multinomial", standardize=F, type.multinomial="grouped")
-  if(type=="1sea") {
-    cvm <- gc$cvm
-    a1sesd <- gc$cvsd[which.min(cvm)]/sqrt(10)
+                  family="multinomial", standardize=F, type.multinomial=is.group)
+  
+  if (type=="both") return(list(coef.min=excoefg.coef(gc,type="min"), 
+                                coef.1se=excoefg.coef(gc,type="1se")))
+  else {
+    out <- list(excoefg.coef(gc=gc,type=type))
+    names(out) <- paste0("coef.", type)
+    return(out)
   }
+}
+
+# a function nested inside excoefg
+# extract coef from the result of cv.glmnet, "1se", "min" or "both"
+excoefg.coef <- function(gc, type){
   li <- switch(type,
                "min" = which(gc$lambda == gc$lambda.min),
-               "1se" = which(gc$lambda == gc$lambda.1se),
-               "1sea" = min(which(cvm < (min(cvm) + a1sesd) & cvm > (min(cvm) - a1sesd)))
+               "1se" = which(gc$lambda == gc$lambda.1se)
   )
   g1 <- gc$glmnet.fit
   coef1 <-lapply(g1$beta, function(u) u[,li])
@@ -136,47 +146,28 @@ excoefg <- function(dat, type="1se") {
   coef1 <- cbind(alpha, coef1)
   coef1 <- apply(coef1,1, function(u) u-coef1[4,])
   coef1 <- t(coef1[,-4])
-  
-  g2 <- cv.glmnet(dat$x[,-1], y=cbind(dat$y,1-rowSums(dat$y)), 
-                  family="multinomial", standardize=F)
-  if(type=="1sea") {
-    cvm2 <- g2$cvm
-    a1sesd2 <- g2$cvsd[which.min(cvm2)]/sqrt(10)
-  }
-  li2 <- switch(type,
-                "min" = which(g2$lambda == g2$lambda.min),
-                "1se" = which(g2$lambda == g2$lambda.1se),
-                "1sea" = min(which(cvm2 < (min(cvm2) + a1sesd2) & cvm2 > (min(cvm2) - a1sesd2)))
-  )
-  g3 <- g2$glmnet.fit
-  coef3 <-lapply(g3$beta, function(u) u[,li2])
-  coef3 <- unlist(coef3)
-  coef3 <- matrix(coef3, nrow=4,byrow=T)
-  alpha2=g3$a0[,li2]
-  coef3 <- cbind(alpha2, coef3)
-  coef3 <- apply(coef3,1, function(u) u-coef3[4,])
-  coef3 <- t(coef3[,-4])
-  
-  out <- list(coefgrp = coef1, coefugp = coef3)
-  return(out)
+  return(coef1)
 }
-## extract coef from fista
+
+## extract coef from cross validation based on fista
 ## calls findlambda to get the lambda.min or lambda.1es
-## returns a list of length n2, in each element contains (df, coef,) mse
+## returns a list, type=
+## "both"  list: 1-coef.min, 2-coef.1se, 3-ind
+## "min"   list: 1-coef.min, 2-ind
+## "1se"   list: 1-coef.1se, 2-ind
 ## indmmin indicates which lambda2 to use
-excoeff <- function (dat, type="1se", fitype = NULL, lambda2seq=1, dfmax=NULL) {
+excoeff <- function (dat, type="both", fitype = NULL, lambda2seq=1, dfmax=50) {
   if(is.null(fitype)) fitype <- "ordinary"
-#  if (fitype == "refit" | fitype == "adprf") type="min"
   cv1 <- cv(dat=dat, k=5, dfmax=dfmax, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
-  lambda1 <- switch(type,
-                       "min" = flambda$lambda.min,
-                    "1se" = flambda$lambda.1se
-  )
+  coef.min <- fista(dat=dat, tuning=list(flambda$lambda.min,lambda2), fitype=fitype)$coef
+  coef.1se <- fista(dat=dat, tuning=list(flambda$lambda.1se,lambda2), fitype=fitype)$coef
   indmmin <- flambda$indmmin
-  lambda2 <- lambda2seq[indmmin]
-  coef0 <- fista(dat=dat, tuning=list(lambda1,lambda2), fitype=fitype)$coef
-  return(list(coef=coef0, ind=indmmin))
+  
+  if (type=="both") return(list(coef.min=coef.min, coef.1se=coef.1se, ind=indmmin))
+  else if (type=="min") return(list(coef.min=coef.min, ind=indmmin))
+  else if (type=="1se") return(list(coef.1se=coef.1se, ind=indmmin))
+  else stop("'type' should be one of 'both', '1se', 'min'")
 }
 
 ## extract coef from multinom
@@ -223,30 +214,41 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
                 "large" = 50
   )
   coefs <- coefsdat(dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
-  coef <- coefs[[1]]
-  ind <- coefs[[2]]
-  crite <- getcrt(coef=coef, coef0=dat$coef, modsize=modsize, predat=predat)
-  al.crit <- c(crite, ind=list(ind))
-  return(list(criteria = al.crit, coef = coef, dat = dat))
+  coefs.min <- coefs$coefs.min
+  coefs.1se <- coefs$coefs.1se
+  ind <- coefs$ind
+  crt.min <- getcrt(coef=coefs.min, coef0=dat$coef, modsize=modsize, predat=predat)
+  crt.1se <- getcrt(coef=coefs.1se, coef0=dat$coef, modsize=modsize, predat=predat)
+  al.crt <- list(crt.min=crt.min, crt.1se=crt.1se, ind=ind)
+  return(list(criteria = al.crt, coefs = coefs, dat = dat))
 }
 
 ## the function generates a list containing 7 coefs
 coefsdat <- function(dat, lambda2seq, type=NULL, dfmax=NULL) {
-  coef <- list(7)
-  coef[[1]] <- excoefm(dat)
-  gfit <- excoefg(dat, type=type)
-  coef[[2]] <- gfit$coefugp
-  coef[[3]] <- gfit$coefgrp
+  coefs.min <- list(7)
+  coefs.1se <- list(7)
+  coefs.min[[1]] <- excoefm(dat)
+  coefs.1se[[1]] <- coefs.min[[1]]
+  gfit.ung <- excoefg(dat, type=type, is.group="ungrouped")
+  coefs.min[[2]] <- gfit.ung$coef.min
+  coefs.1se[[2]] <- gfit.ung$coef.1se
+  gfit.grp <- excoefg(dat, type=type, is.group="grouped")
+  coefs.min[[3]] <- gfit.grp$coef.min
+  coefs.1se[[3]] <- gfit.grp$coef.1se
   fit1 <- excoeff(dat=dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   fit2 <- excoeff(dat=dat, fitype="adapt", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   fit3 <- excoeff(dat=dat, fitype="refit", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   fit4 <- excoeff(dat=dat, fitype="adprf", lambda2seq=lambda2seq, type=type, dfmax=dfmax)
-  coef[[4]] <- fit1[[1]]
-  coef[[5]] <- fit2[[1]]
-  coef[[6]] <- fit3[[1]]
-  coef[[7]] <- fit4[[1]]
-  ind <- c(fit1[[2]], fit2[[2]], fit3[[2]], fit4[[2]])
-  return(list(coef, ind))
+  coefs.min[[4]] <- fit1$coef.min
+  coefs.1se[[4]] <- fit1$coef.1se
+  coefs.min[[5]] <- fit2$coef.min
+  coefs.1se[[5]] <- fit2$coef.1se
+  coefs.min[[6]] <- fit3$coef.min
+  coefs.1se[[6]] <- fit3$coef.1se
+  coefs.min[[7]] <- fit4$coef.min
+  coefs.1se[[7]] <- fit4$coef.1se
+  ind <- c(fit1$ind, fit2$ind, fit3$ind, fit4$ind)
+  return(list(coefs.min=coefs.min, coefs.1se=coefs.1se, ind=ind))  
 }
 
 ## input a list of coefs and the true value coef0
