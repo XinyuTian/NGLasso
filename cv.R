@@ -118,7 +118,7 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
     mdev[[l]] <- rowMeans(dev, na.rm = TRUE)
     mbrierscore[[l]] <- rowMeans(brierscore, na.rm = TRUE)
     sdev[[l]] <- apply(dev, 1, sd, na.rm = TRUE) / sqrt(k - 1)
-    sbrierscore[[l]] <- apply(brierscore, 1, sd, na.rm = TRUE)
+    sbrierscore[[l]] <- apply(brierscore, 1, sd, na.rm = TRUE) / sqrt(k - 1)
   }
   
   means <- switch(type,
