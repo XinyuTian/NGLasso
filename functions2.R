@@ -256,8 +256,8 @@ coefsdat <- function(dat, lambda2seq, type=NULL, dfmax=NULL) {
 ## generate 6 criteria ---- MSE of coefficients, FNR/FPR/FDR for variable selection,
 ## Brier score and prediction accuracy
 getcrt <- function(coef, coef0, modsize, predat) {
-  noc <- length(coef0)
-  mse <- lapply(coef, function(c1) sum((c1-coef0)^2) / noc) 
+  nparam <- length(coef0)
+  mse <- lapply(coef, function(c1) sum((c1-coef0)^2) / nparam) 
   ind <- lapply(coef, nvar)
   ind0 <- switch(modsize,
                  "small" = c(2:5),
@@ -270,15 +270,15 @@ getcrt <- function(coef, coef0, modsize, predat) {
               "large" = 200
   )
   nz <- length(ind0)
-  nTP <- lapply(ind, function(XX) sum(!is.na(match(ind0, XX))))
-  nFN <- lapply(nTP, function(XX) nz - XX)
+  nTP <- as.numeric(lapply(ind, function(XX) sum(!is.na(match(ind0, XX)))))
+  nFN <- nz - nTP
   nFP <- mapply(function(xx, yy) length(xx) - yy - 1, ind, nTP)
-  nTN <- lapply(nFP, function(XX) P-nz - XX)
+  nTN <- P-nz - nFP
   predcrite <- lapply(coef, pred, newdat=predat)
   predcrite0 <- do.call(rbind, predcrite)
   brier <- predcrite0[,1]
   accu <- predcrite0[,2]
-  return(list(MSE = unlist(mse), FPR = as.numeric(nFP)/(P-nz), FNR = as.numeric(nFN)/nz,
-              FDR = as.numeric(nFP)/(nz-as.numeric(nFN)+as.numeric(nFP)), brier=brier, accuacy=accu))
+  return(list(MSE = unlist(mse), FPR = nFP/(P-nz), FNR = nFN/nz, FDR = nFP/(nz-nFN+nFP), 
+              MCC = (nTP*nTN - nFP*nFN)/sqrt((nTP+nFP)*nz*(P-nz)*(nTN+nFN)), brier=brier, accuacy=accu))
 }
 
