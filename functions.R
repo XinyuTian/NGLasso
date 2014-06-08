@@ -59,9 +59,6 @@ pgradient <- function(dat, mu, coef, weights, tuning, Lmatrix){
 
 update.eta <- function(dat, coef, weights, iter.count=0)
 {
-  if(!is.matrix(coef)){
-    coef <- matrix(coef, nrow=ncol(dat$y))
-  }
   if(!is.matrix(dat$x) | !is.matrix(coef)){
     #warning(paste("x or coef is not a matrix, iter.count=",iter.count))
     coef <- matrix(coef, nrow=ncol(dat$y))
