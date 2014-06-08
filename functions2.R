@@ -160,9 +160,10 @@ excoeff <- function (dat, type="both", fitype = NULL, lambda2seq=1, dfmax=50) {
   if(is.null(fitype)) fitype <- "ordinary"
   cv1 <- cv(dat=dat, k=5, dfmax=dfmax, fitype=fitype, lambda2seq=lambda2seq)
   flambda <- findlambda(dat = dat, cv1=cv1, fitype = fitype)
+  indmmin <- flambda$indmmin
+  lambda2 <- lambda2seq[indmmin]
   coef.min <- fista(dat=dat, tuning=list(flambda$lambda.min,lambda2), fitype=fitype)$coef
   coef.1se <- fista(dat=dat, tuning=list(flambda$lambda.1se,lambda2), fitype=fitype)$coef
-  indmmin <- flambda$indmmin
   
   if (type=="both") return(list(coef.min=coef.min, coef.1se=coef.1se, ind=indmmin))
   else if (type=="min") return(list(coef.min=coef.min, ind=indmmin))
