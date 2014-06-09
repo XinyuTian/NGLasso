@@ -1,9 +1,9 @@
 fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fitype = NULL, 
                   stepsize.init = 4,  max.iter = 500, rel.tol = 1e-6, worsen.max=20)
 {
-  #  sancheck <- model@sancheck
-  #  environment(sancheck) <- sys.frame(sys.nframe())
-  #  do.sancheck <- TRUE
+#  sancheck <- model@sancheck
+#  environment(sancheck) <- sys.frame(sys.nframe())
+#  do.sancheck <- TRUE
   nobs <- nrow(dat$y)
   P <- ncol(dat$x)-1
   Q <- ncol(dat$y)
@@ -11,18 +11,19 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   iter.count <- 0
   Lmatrix <- dat$Lmatrix
   if(is.null(fitype)) fitype <- "ordinary"
-  tuning[[1]] <- tuning[[1]] * nobs
-  
+  if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
+  stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
+
   ## initializing
   if (is.null(coef.init)) coef.init <- matrix(1,nrow=K-1,ncol=P+1)
   coef.old1 <- coef.init
   coef <- coef.init
   ## internally, coef must be a list, therefore:
-  #  if(!is.list(coef.init)){
-  #    coef.old1 <- list(coef.old1)
-  #    coef <- list(coef)
-  #  }
-  #  eta <- update.eta(dat=dat, coef=coef, weights=weights, iter.count)
+#  if(!is.list(coef.init)){
+#    coef.old1 <- list(coef.old1)
+#    coef <- list(coef)
+#  }
+#  eta <- update.eta(dat=dat, coef=coef, weights=weights, iter.count)
   eta <- matrix(1, nrow=nobs, ncol=K-1)
   mu <- update.mu(eta)
   
@@ -52,11 +53,11 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   best.eta <- eta
   best.mu <- mu
   best.stepsize <- stepsize
-  #  best.penweights <- penweights
+#  best.penweights <- penweights
   best.d.fn <- d.fn
   best.proxim <- 0
   
-  #  print(paste("this is the ", iter.count, "th iteration."))
+#  print(paste("this is the ", iter.count, "th iteration."))
   
   ## the loop
   while(d.fn > rel.tol){
@@ -70,10 +71,10 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
     
     ## perform a sanity check to detect if the model is deteriorating towards a
     ## degenerate solution.
-    #    if(do.sancheck){
-    #      sancheck(coef = coef, coef.old2 = coef.old2, mu = mu, eta = eta,
-    #               weights = weights, Proximal.args = Proximal.args) 
-    #    }
+#    if(do.sancheck){
+#      sancheck(coef = coef, coef.old2 = coef.old2, mu = mu, eta = eta,
+#               weights = weights, Proximal.args = Proximal.args) 
+#    }
     
     fista.beta <- (fista.alpha[iter.count] - 1)/fista.alpha[iter.count + 1]
     
@@ -109,14 +110,14 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
       fn.val <- -lprox
       fn.val.approx <- -loss.approx + (proxim/ stepsize/2)
       scalefac <- 2
-      #      print(list(dim1=dim(dat$y), dim2=dim(muprox), w=length(weights)))
-      #      print(paste("this is the ", iter.count, "th iteration."))
+#      print(list(dim1=dim(dat$y), dim2=dim(muprox), w=length(weights)))
+#      print(paste("this is the ", iter.count, "th iteration."))
     } ## end while(fn.val > ...)
     
     if(stepsize < 1e-30){warning(paste("FISTA couldnt find a feasible stepsize during iteration",
-                                       iter.count))
-                         break} 
-    
+                                              iter.count))
+                                break} 
+
     coef <- coefprox
     eta <- etaprox
     mu <- muprox
@@ -136,7 +137,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
       best.mu <- mu
       best.fn.val <- fn.val
       best.fn.val.approx <- fn.val.approx
-      #      best.penweights <- penweights
+#      best.penweights <- penweights
       best.pen <- penprox
       best.proxim <- proxim
       best.l <- lprox
@@ -147,7 +148,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
     }else{worsen.count <- worsen.count + 1}
     if(worsen.count >= worsen.max){
       warning(paste("fista terminated after", worsen.max,
-                    "consecutive iterations in which the objective function worsened"))
+                     "consecutive iterations in which the objective function worsened"))
       break
     }
     
@@ -185,5 +186,6 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
     
   }
   
-  return(out)
-}
+    return(out)
+  }
+  
