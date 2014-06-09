@@ -7,7 +7,7 @@ loglik <- function(y, mu, weights,  ...){
   muc[which(muc <= 1e-6)] <- 1e-8
   muc[which(muc >= 1 - 1e-6)] <- 1 - 1e-8
   yc <- cbind(1 - rowSums(y), y)
-  logl <- sum(weights * yc * log(muc))/nrow(y)   
+  logl <- sum(weights * yc * log(muc))
   return(logl)
 }
 ## ploglik:   penalized log likelihood
@@ -34,7 +34,7 @@ ploglik = function(y, mu, coef, weights, tuning, Lmatrix){
 ##            function. returns a q*p matrix that belongs to x. 
 ##            x must be an nobs*p matrix. y must be a nobs*q matrix.
 gradient = function(dat, mu, weights, ...){
-  grad <- crossprod((dat$y - mu), weights * dat$x)/nrow(dat$y)
+  grad <- crossprod((dat$y - mu), weights * dat$x)
   return(grad)
 }
 ## penalized gradient
