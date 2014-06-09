@@ -7,7 +7,7 @@ loglik <- function(y, mu, weights,  ...){
   muc[which(muc <= 1e-6)] <- 1e-8
   muc[which(muc >= 1 - 1e-6)] <- 1 - 1e-8
   yc <- cbind(1 - rowSums(y), y)
-  logl <- sum(weights * yc * log(muc))
+  logl <- sum(weights * yc * log(muc))  
   return(logl)
 }
 ## ploglik:   penalized log likelihood
@@ -59,6 +59,9 @@ pgradient <- function(dat, mu, coef, weights, tuning, Lmatrix){
 
 update.eta <- function(dat, coef, weights, iter.count=0)
 {
+  if(!is.matrix(coef)){
+    coef <- matrix(coef, nrow=ncol(dat$y))
+  }
   if(!is.matrix(dat$x) | !is.matrix(coef)){
     #warning(paste("x or coef is not a matrix, iter.count=",iter.count))
     coef <- matrix(coef, nrow=ncol(dat$y))
@@ -79,7 +82,7 @@ update.mu <- function(eta){
 
 ## l2norm and generic soft thresholding function
 tresh <- function(u, lambda, w){
-#  w <- sqrt(length(c(u))) * w
+  #  w <- sqrt(length(c(u))) * w
   st <- 1 - lambda * w / norm(as.matrix(u), "F")
   u <- max(st, 0) * u
   u
@@ -106,9 +109,9 @@ penalty <- function(coef, tuning, Q, penweights){
 ## obj objective function: penalized likelihood, which we want to minimize
 obj <- function(coef1, dat, weights, tuning, penweights){
   y <- dat$y
-#  if(!is.matrix(coef1)){
-#    coef1 <- matrix(coef1, nrow=ncol(dat$y))
-#  }
+  #  if(!is.matrix(coef1)){
+  #    coef1 <- matrix(coef1, nrow=ncol(dat$y))
+  #  }
   eta <- update.eta(dat, coef1, weights, iter.count=1)
   mu <- update.mu(eta)
   aa <- ploglik(dat$y, mu, coef=coef1, weights=weights, tuning, dat$Lmatrix)
@@ -131,10 +134,10 @@ getpenweights <- function(dat) {
 
 ## generate coviance matrix of X
 ## symmetric, diagonal is rho, geometric 
-getcov <- function(rho, P, ctl=1e-6) {
+getcov <- function(rho, P) {
   v1 <- c((P-1):0, 1:(P-1))
   longv <- rho ^ v1
-  longv1 <- sapply(longv, function(x) ifelse(x<ctl,0,x))
+  longv1 <- sapply(longv, function(x) ifelse(x<1e-6,0,x))
   sapply(seq(P), function(i) longv1[(P+1-i):(2*P-i)])
 }
 
