@@ -1,7 +1,7 @@
 ## find the lambda.min and lambda.1se of a cv.
 ## if length(lambda2seq) > 1, choose the global minimum
 findlambda <- function(dat, lambdaseq = NULL, lambda2seq=NULL, cv1, fitype = NULL) {
-#  if (missing(cv1)) cv1 <<- cv(dat=dat, lambdaseq = lambdaseq, lambda2seq = lambda2seq, adapt = adapt)
+  #  if (missing(cv1)) cv1 <<- cv(dat=dat, lambdaseq = lambdaseq, lambda2seq = lambda2seq, adapt = adapt)
   lambdaseq <- cv1$lambdaseq
   lambda2seq <- cv1$lambda2seq
   n2 <- length(lambda2seq)
@@ -192,12 +192,12 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
                                   "large" = crtcoef1(P=200,nz=10,coef1=c(0.5, -1.2, 1))
                  ),
                  "randm" = NULL
-    )
+  )
   Lmatrix <- switch(modsize,
                     "small" = crtLmat(P=20,nz=4),
                     "medium" = crtLmat(P=100,nz=10),
                     "large" = crtLmat(P=200,nz=10)
-    )
+  )
   
   dat <- switch(modsize,
                 "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
@@ -205,14 +205,14 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
                 "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
   predat <- switch(modsize,
-                "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
-                "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
-                "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
+                   "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
+                   "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
+                   "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
   )
   dfmax <- switch(modsize,
-                "small" = 10,
-                "medium" = 50,
-                "large" = 50
+                  "small" = 10,
+                  "medium" = 50,
+                  "large" = 50
   )
   coefs <- coefsdat(dat, lambda2seq=lambda2seq, type=type, dfmax=dfmax)
   coefs.min <- coefs$coefs.min
@@ -263,7 +263,7 @@ getcrt <- function(coef, coef0, modsize, predat) {
                  "small" = c(2:5),
                  "medium" = c(2:11),
                  "large" = c(2:11)
-    )
+  )
   P <- switch(modsize,
               "small" = 20,
               "medium" = 100,
@@ -281,4 +281,3 @@ getcrt <- function(coef, coef0, modsize, predat) {
   return(list(MSE = unlist(mse), FPR = nFP/(P-nz), FNR = nFN/nz, FDR = nFP/(nz-nFN+nFP), 
               MCC = (nTP*nTN - nFP*nFN)/sqrt((nTP+nFP)*nz*(P-nz)*(nTN+nFN)), brier=brier, accuacy=accu))
 }
-
