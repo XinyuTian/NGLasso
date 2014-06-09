@@ -48,7 +48,7 @@ getlambdamax <- function(dat, weights = NULL, threshold = F, refit = F)
   
   ## now the norms of the gradient of the penalized groups, based on the null model.
   gradnorms.x <- apply(grad0, 2, function(v) {norm(as.matrix(v), type="f")})
-  lambdamax <- max(gradnorms.x)
+  lambdamax <- max(gradnorms.x) / nobs
   
   return(lambdamax)
 }
