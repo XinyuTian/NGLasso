@@ -98,7 +98,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
       stepsize <- stepsize / scalefac
       coeft <- Map('+', coefs, lapply(grad, function(u){u * stepsize}))
       coeft <- matrix(unlist(coeft), nrow=Q)
-      tuning.scaled <- lapply(tuning, function(u){u * stepsize})
+      tuning.scaled <- lapply(tuning, function(u){u * stepsize * nobs})
       coefprox <- fistaProximal(coef=coeft, tuning=tuning.scaled, penweights=penweights)
       etaprox <- update.eta(dat=dat, coef=coefprox, weights=weights, iter.count)
       muprox <- update.mu(etaprox)
