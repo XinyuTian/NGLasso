@@ -1,4 +1,5 @@
-cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2seq=0.1, fitype = NULL) {
+
+cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, lambda2seq=0.1, fitype = NULL) {
   
   if(k < 3) stop("'less than 3'-fold crossvalidation not supported")
   nobs <- nrow(dat$y)
@@ -45,12 +46,9 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
   newdata <- list(); length(newdata) <- k
   for(j in seq(k))  newdata[[j]] <- list(y = dat$y[cvinds[[j]], ], x = dat$x[cvinds[[j]], ])
   
-  #  cvlist <- list(); length(cvlist) <- n2
   df <- list(); length(df) <- n2
-  mdev <- list(); length(mdev) <- n2
-  mbrierscore <- list(); length(mbrierscore) <- n2
-  sdev <- list(); length(sdev) <- n2
-  sbrierscore <- list(); length(sbrierscore) <- n2
+  means <- list(); length(means) <- n2
+  sds <- list(); length(sds) <- n2
   
   for (l in 1:n2) {
     lambda2 <- lambda2seq[l]
@@ -58,13 +56,10 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
     i <- 1
     lambda1 <- lambdaseq[1]
     dftemp <- 0
-    #    cvlist[[l]] <- list()
-    dev <-  matrix(nrow = n1, ncol = k)
-    brierscore <-  matrix(nrow = n1, ncol = k)
-    
-    # initial values
-    ctl <- 0
     oldmean <- 100
+
+    measure <-  matrix(nrow = n1, ncol = k)
+    
     while(i <= n1 & dftemp <= dfmax) {      
       ## a function doing the j-th cv, returns a list of coef with length = k
       cvcore <- function(j){
@@ -73,7 +68,7 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
                       Lmatrix = dat$Lmatrix, pwt = dat$pwt)
         coef <- fista(dat=cvdat, tuning=list(lambda1,lambda2), coef.init = coef.init,
                       fitype = fitype)$coef
-        
+
         if (all(!is.na(coef))) coef.init <<- coef
         return(coef)  
       }
@@ -83,10 +78,10 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
       ## df
       dfseq <- lapply(cvtemp, function(coef) length(nvar(coef))-1 )
       dfseq <- unlist(unlist(dfseq))
-      dftemp <- median(dfseq)
+      dftemp <- Mode(dfseq)
       df[[l]][i] <- dftemp
       logl <- c()
-      
+
       for(j in seq(k)){
         nobsj <- length(cvinds[[j]])
         coefj <- cvtemp[[j]]
@@ -94,43 +89,27 @@ cv <- function(dat, k = 10, dfmax=NULL, type = "brier", lambdaseq=NULL, lambda2s
           etaj <- update.eta(dat = newdata[[j]], coef = coefj, weights = rep(1,nobsj))
           muj <- update.mu(etaj)
           
-          logl[j] <- loglik(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
-          dev[i, j] <- 2*(loglik(y = newdata[[j]]$y, mu = newdata[[j]]$y,
-                                 weights = rep(1,nobsj)) - logl[j])
-          brierscore[i, j] <- Brier(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
-        } else {dev[i, j] <- NA; brierscore[i, j] <- NA}
+          if (crt.measure == "brier") 
+            measure[i, j] <- Brier(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
+          else if (crt.measure == "dev") {
+            logl[j] <- loglik(y = newdata[[j]]$y, mu = muj, weights = rep(1,nobsj))
+            measure[i, j] <- 2*(loglik(y = newdata[[j]]$y, mu = newdata[[j]]$y,
+                                       weights = rep(1,nobsj)) - logl[j])
+          }
+        } else measure[i, j] <- NA
       }
-      #      print(paste("this is the ", i, "th iteration."))
-      #      cvlist[[l]][[i]] <- cvtemp
-      #      newmean <- mean(brierscore[i, ], na.rm = TRUE)
-      #      if (!is.na(newmean) & abs(oldmean-newmean) > 0.001*newmean & i>10) {
-      #        if ((oldmean-newmean) <= 0.005*newmean) ctl<-ctl+1 else ctl<-0 
-      #        if (ctl > 3) {break; print(paste("break while loop at i = ", i))}
-      #        oldmean <-newmean
-      #      }
       i <- i+1 
       lambda1 <- lambdaseq[i]
     }
     
-    dev <- na.omit(dev)
-    brierscore <- na.omit(brierscore)
-    mdev[[l]] <- rowMeans(dev, na.rm = TRUE)
-    mbrierscore[[l]] <- rowMeans(brierscore, na.rm = TRUE)
-    sdev[[l]] <- apply(dev, 1, sd, na.rm = TRUE) / sqrt(k - 1)
-    sbrierscore[[l]] <- apply(brierscore, 1, sd, na.rm = TRUE) / sqrt(k - 1)
+    measure <- na.omit(measure)
+    means[[l]] <- rowMeans(measure, na.rm = TRUE)
+    sds[[l]] <- apply(measure, 1, sd, na.rm = TRUE) / sqrt(k)
   }
   
-  means <- switch(type,
-                  "deviance" = mdev,
-                  "brier" = mbrierscore
-  )
-  
-  sds <- switch(type,    ## we compute the sd of the estimator for the mean, not the sample sd!!
-                "deviance" = sdev,
-                "brier" = sbrierscore
-  )
-  
-  return(list(mean = means, sd = sds, type = type, df = df, 
-              lambdaseq = lambdaseq, lambda2seq = lambda2seq, mdev=mdev, sdev=sdev, fold=k))
+  return(list(mean = means, sd = sds, type = crt.measure, df = df, 
+              lambdaseq = lambdaseq, lambda2seq = lambda2seq, fold=k))
   
 }
+
+
