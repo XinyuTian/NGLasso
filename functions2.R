@@ -103,14 +103,13 @@ pred <- function(newdat, coef0, weights=NULL) {
   mu <- update.mu(eta)
   yc <- cbind(y,1-rowSums(y))
   muc <- cbind(mu,1-rowSums(mu))
-  yv <- as.vector(yc)
-  muv <- as.vector(muc)
-  predev <- norm(as.matrix(yv-muv), type="F")
+  predev <- norm(as.matrix(yc-muc), type="F")
   yi <- apply(yc, 1, which.max)
   mui <- apply(muc, 1, which.max)
   accu <- sum(yi == mui)/nrow(y)
   return(c(predev, accu))
 }
+
 
 
 ## exstract coef using cv.glmnet, "grouped" or "ungrouped"
