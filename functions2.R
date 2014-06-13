@@ -190,7 +190,11 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
                                   "medium" = crtcoef1(P=100,nz=10),
                                   "large" = crtcoef1(P=200,nz=10,coef1=c(0.5, -1.2, 1))
                  ),
-                 "randm" = NULL
+                 "randm" = switch(modsize,
+                                  "small" = crtcoef2(P=20,nz=4),
+                                  "medium" = crtcoef2(P=100,nz=10),
+                                  "large" = crtcoef2(P=200,nz=10,coef1=c(0.5, -1.2, 1))
+                 )
   )
   Lmatrix <- switch(modsize,
                     "small" = crtLmat(P=20,nz=4),
