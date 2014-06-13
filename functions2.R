@@ -183,7 +183,7 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
                  "ideal" = switch(modsize,
                                   "small" = crtcoef(P=20,nz=4),
                                   "medium" = crtcoef(P=100,nz=10),
-                                  "large" = crtcoef(P=200,nz=10,coef0 = c(-0.25, 0.15, -0.05))
+                                  "large" = crtcoef(P=200,nz=10)
                  ),
                  "simil" = switch(modsize,
                                   "small" = crtcoef1(P=20,nz=4),
