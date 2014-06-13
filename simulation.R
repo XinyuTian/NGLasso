@@ -105,3 +105,9 @@ crtcoef1 <- function (K=4, P, nz) {
   coef <- cbind(sample(seq(-0.5, 0.5,by=0.05), size=K-1, replace=T), coef) 
   return(coef)
 }
+
+crtcoef2 <- function (K=4, P, nz) {
+  coef <- matrix(sample(seq(-0.5, 0.5,by=0.05), size=(K-1)*(nz+1), replace=T), K-1, nz+1)
+  sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
+  return(coef)
+}
