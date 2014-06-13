@@ -159,16 +159,14 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   ## coef was transformed to be a list. before fista returns its output, coef thus
   ## has to be transformed back into the form that coef.init had. if coef.init 
   ## was a vector or matrix, the artificial listversion of coef has length 1.
-  if (fitype == "refit" | fitype == "adprf") {
-    ind <- nvar(coefprox) 
-    if (length(ind) == 1) out <- list(coef=NA) else {
-      if(ind[1] == 1) ind0 <- ind[-1]-1 else ind0 <- ind-1
-      newdata <- list(y=dat$y, x=dat$x[, ind], Lmatrix=Lmatrix[ind0,ind0], pwt = dat$pwt[ind])
-      out <- fista(newdata, tuning = list(0, tuning[[2]]))
-      tempcoef <- matrix(0, Q, P+1)
-      tempcoef[, ind] <- out$coef
-      out$coef <- tempcoef
-    }
+  ind <- nvar(coefprox) # including the intercept
+  if ((fitype == "refit" | fitype == "adprf") & (length(ind) != 1)) {
+    if(ind[1] == 1) ind0 <- ind[-1]-1 else ind0 <- ind-1
+    newdata <- list(y=dat$y, x=dat$x[, ind], Lmatrix=Lmatrix[ind0,ind0], pwt = dat$pwt[ind])
+    out <- fista(newdata, tuning = list(0, tuning[[2]]))
+    tempcoef <- matrix(0, Q, P+1)
+    tempcoef[, ind] <- out$coef
+    out$coef <- tempcoef
   }  else {
     out <- list(coef = best.coef,
                 stepsize = best.stepsize,
