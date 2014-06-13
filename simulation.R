@@ -78,11 +78,26 @@ multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix, rho = 0.5,
   return(dat)
 }
 
-crtcoef <- function (coef0 = c(-0.25, 0.5, -0.35), coef1 = c(0.4, -0.25, 0.1), P, nz) {
+crtcoef <- function (coef0 = c(0, 0, 0), coef1 = c(0.4, -0.25, 0.1), P, nz) {
   coef=numeric(0)
   sapply(seq(nz), function (x) coef <<- cbind(coef, coef1))
   sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
   coef <- cbind(coef0, coef) 
+  return(coef)
+}
+
+crtcoef1 <- function (K=4, P, nz) {
+  coef <- matrix(0, K-1, nz)
+  sapply(seq(K-1), function(i) coef[i,] <<- sample(seq(0.05, 0.5,by=0.05), size=nz, replace=T)*sample(c(-1,1),1))
+  sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
+  coef <- cbind(c(0, 0, 0), coef) 
+  return(coef)
+}
+
+crtcoef2 <- function (K=4, P, nz) {
+  coef <- matrix(sample(seq(-0.5, 0.5,by=0.05), size=(K-1)*nz, replace=T), K-1, nz)
+  sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
+  coef <- cbind(c(0, 0, 0), coef) 
   return(coef)
 }
 
@@ -96,18 +111,4 @@ crtLmat <-  function (P, nz) {
   di <- 1/sqrt(diag(Lmatrix))
   Lmatrix <- t(t(Lmatrix*di)*di)  
   return(Lmatrix)
-}
-
-crtcoef1 <- function (K=4, P, nz) {
-  coef <- matrix(0, K-1, nz)
-  sapply(seq(K-1), function(i) coef[i,] <<- sample(seq(0.05, 0.5,by=0.05), size=nz, replace=T)*sample(c(-1,1),1))
-  sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
-  coef <- cbind(sample(seq(-0.5, 0.5,by=0.05), size=K-1, replace=T), coef) 
-  return(coef)
-}
-
-crtcoef2 <- function (K=4, P, nz) {
-  coef <- matrix(sample(seq(-0.5, 0.5,by=0.05), size=(K-1)*(nz+1), replace=T), K-1, nz+1)
-  sapply(seq(P-nz), function (x) coef <<- cbind(coef, 0))
-  return(coef)
 }
