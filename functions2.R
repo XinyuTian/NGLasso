@@ -281,6 +281,5 @@ getcrt <- function(coef, coef0, modsize, predat) {
   predcrite0 <- do.call(rbind, predcrite)
   brier <- predcrite0[,1]
   accu <- predcrite0[,2]
-  return(list(MSE = unlist(mse), FPR = nFP/(P-nz), FNR = nFN/nz, FDR = nFP/(nz-nFN+nFP), 
-              MCC = (nTP*nTN - nFP*nFN)/sqrt((nTP+nFP)*nz*(P-nz)*(nTN+nFN)), brier=brier, accuacy=accu))
+  return(list(MSE = unlist(mse), TP = nTP, FP = nFP, TN = nTN, FN = nFN, brier=brier, accuacy=accu))
 }
