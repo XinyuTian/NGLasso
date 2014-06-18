@@ -112,3 +112,28 @@ crtLmat <-  function (P, nz) {
   Lmatrix <- t(t(Lmatrix*di)*di)  
   return(Lmatrix)
 }
+
+crtLmat1 <- function(Lmattype="noise", P, nz) {
+  upper.lim <- switch(Lmattype,
+                      "noise"=0.25,
+                      "incor"=0.6
+                      )
+  Amatrix <- crtAmat(upper.lim, P, nz)
+  Dmatrix <- diag(rowSums(Amatrix))
+  Lmatrix <- Dmatrix -Amatrix
+  di <- 1/sqrt(diag(Lmatrix))
+  Lmatrix <- t(t(Lmatrix*di)*di)  
+  return(Lmatrix)
+}
+
+crtAmat <- function(upper.lim, P, nz) {
+  lower.lim <- 1-upper.lim
+  k <- P / nz
+  m.block <- matrix(lower.lim, nrow=nz, ncol=nz)
+  m.rep <- repblockMatrixDiagonal(m.block, k)
+  m.base <- matrix(runif(P^2, min=0, max=upper.lim), nrow=P)
+  m.sum <- m.base + m.rep
+  Amatrix <- forceSymmetric(m.sum)
+  diag(Amatrix) <- 1
+  return(Amatrix)
+}
