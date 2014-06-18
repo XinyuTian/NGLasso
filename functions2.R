@@ -178,7 +178,7 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
+outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", lambda2seq, type="1se") {
   coef <- switch(coeftype,
                  "ideal" = switch(modsize,
                                   "small" = crtcoef(P=20,nz=4),
@@ -196,10 +196,22 @@ outfct <- function (modsize="small", coeftype="ideal", lambda2seq, type="1se") {
                                   "large" = crtcoef2(P=200,nz=10)
                  )
   )
-  Lmatrix <- switch(modsize,
-                    "small" = crtLmat(P=20,nz=4),
-                    "medium" = crtLmat(P=100,nz=10),
-                    "large" = crtLmat(P=200,nz=10)
+  Lmatrix <- switch(Lmattype,
+                    "ideal" = switch(modsize,
+                                     "small" = crtLmat(P=20,nz=4),
+                                     "medium" = crtLmat(P=100,nz=10),
+                                     "large" = crtLmat(P=200,nz=10)
+                    ),
+                    "noise" = switch(modsize,
+                                   "small" = crtLmat1(P=20,nz=4),
+                                   "medium" = crtLmat1(P=100,nz=10),
+                                   "large" = crtLmat1(P=200,nz=10)
+                    ),
+                    "incor" = switch(modsize,
+                                     "small" = crtLmat1(Lmattype="incor",P=20,nz=4),
+                                     "medium" = crtLmat1(Lmattype="incor",P=100,nz=10),
+                                     "large" = crtLmat1(Lmattype="incor",P=200,nz=10)
+                    )
   )
   
   dat <- switch(modsize,
