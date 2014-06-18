@@ -178,7 +178,7 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", lambda2seq, type="1se") {
+outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", SNR=1, lambda2seq, type="1se") {
   coef <- switch(coeftype,
                  "ideal" = switch(modsize,
                                   "small" = crtcoef(P=20,nz=4),
@@ -196,6 +196,7 @@ outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", lambda2
                                   "large" = crtcoef2(P=200,nz=10)
                  )
   )
+  coef <- coef*SNR
   Lmatrix <- switch(Lmattype,
                     "ideal" = switch(modsize,
                                      "small" = crtLmat(P=20,nz=4),
