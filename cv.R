@@ -1,5 +1,6 @@
 
-cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, lambda2seq=0.1, fitype = NULL) {
+cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, lambda2seq=0.1, 
+               fitype = NULL, ratio=NULL, scl=NULL) {
   
   if(k < 3) stop("'less than 3'-fold crossvalidation not supported")
   nobs <- nrow(dat$y)
@@ -8,7 +9,7 @@ cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, l
   if(is.null(dfmax)) dfmax <- P/2
   if(is.null(lambdaseq)) {
     lambdamax <- getlambdamax(dat=dat)
-    lambdaseq <- getlambdaseq(lambdamax)
+    lambdaseq <- getlambdaseq(lambdamax, ratio=ratio, scl=scl)
   }
   n1 <- length(lambdaseq)
   n2 <- length(lambda2seq)
