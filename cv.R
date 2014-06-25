@@ -9,7 +9,7 @@ cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, l
   if(is.null(dfmax)) dfmax <- P/2
   if(is.null(lambdaseq)) {
     lambdamax <- getlambdamax(dat=dat)
-    lambdaseq <- getlambdaseq(lambdamax, ratio=ratio, scl=scl)
+    lambdaseq <- getlambdaseq(lambdamax=lambdamax, ratio=ratio, scl=scl)
   }
   n1 <- length(lambdaseq)
   n2 <- length(lambda2seq)
