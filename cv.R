@@ -1,6 +1,6 @@
 
 cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, lambda2seq=0.1, 
-               fitype = NULL, ratio=NULL, scl=NULL) {
+               fitype = NULL, ratio=0.95, scl=0.05) {
   
   if(k < 3) stop("'less than 3'-fold crossvalidation not supported")
   nobs <- nrow(dat$y)
