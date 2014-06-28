@@ -1,4 +1,4 @@
-getlambdamax <- function(dat, weights = NULL, threshold = F, refit = F)
+getlambdamax <- function(dat, weights = NULL, fitype = NULL)
 {
   nobs <- nrow(dat$y)
   Q <- ncol(dat$y)
@@ -48,6 +48,9 @@ getlambdamax <- function(dat, weights = NULL, threshold = F, refit = F)
   
   ## now the norms of the gradient of the penalized groups, based on the null model.
   gradnorms.x <- apply(grad0, 2, function(v) {norm(as.matrix(v), type="f")})
+  if (fitype == "adapt" | fitype == "adprf") {
+    gradnorms.x <- gradnorms.x / dat$pwt
+  }
   lambdamax <- max(gradnorms.x) / nobs
   
   return(lambdamax)
