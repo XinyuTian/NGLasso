@@ -7,8 +7,9 @@ cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, l
   P <- ncol(dat$x) - 1
   Q <- ncol(dat$y)
   if(is.null(dfmax)) dfmax <- P/2
+  if(is.null(fitype)) fitype <- "ordinary"
   if(is.null(lambdaseq)) {
-    lambdamax <- getlambdamax(dat=dat)
+    lambdamax <- getlambdamax(dat=dat, fitype=fitype)
     lambdaseq <- getlambdaseq(lambdamax=lambdamax, ratio=ratio, scl=scl)
   }
   n1 <- length(lambdaseq)
