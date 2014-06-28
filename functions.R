@@ -78,16 +78,18 @@ update.mu <- function(eta){
 }
 
 ## l2norm and generic soft thresholding function
-tresh <- function(u, lambda, w){
-#  w <- sqrt(length(c(u))) * w
-  st <- 1 - lambda * w / norm(as.matrix(u), "F")
-  u <- max(st, 0) * u
+tresh <- function(u, lambda){
+  #  w <- sqrt(length(c(u))) * w
+  st <- 1 - lambda / norm(as.matrix(u), "F")
+  u <- max(st, 0)
   u
 }
 ## the solution to the optimization problem
 fistaProximal <- function(coef, tuning, penweights){
   coef1 <- as.matrix(coef[,-1])
-  coef1 <- apply(coef1, 2, tresh, lambda=tuning[[1]], w=penweights)
+  coefw <- sweep(coef1, 2, penweights, '/')
+  soft <- apply(coefw, 2, tresh, lambda=tuning[[1]])
+  coef1 <- sweep(coef1, 2, soft, '*')
   return(cbind(coef[,1], coef1))
 }
 
