@@ -1,4 +1,4 @@
-getlambdamax <- function(dat, weights = NULL, fitype = NULL)
+getlambdamax <- function(dat, weights = NULL, fitype = "ordinary")
 {
   nobs <- nrow(dat$y)
   Q <- ncol(dat$y)
