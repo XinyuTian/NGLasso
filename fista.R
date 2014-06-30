@@ -14,6 +14,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
   stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
   tuning[[1]] <- tuning[[1]] * nobs
+  tuning[[2]] <- tuning[[2]] * nobs
 
   ## initializing
   if (is.null(coef.init)) coef.init <- matrix(1,nrow=K-1,ncol=P+1)
