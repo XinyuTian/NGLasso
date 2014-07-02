@@ -24,7 +24,7 @@ ploglik = function(y, mu, coef, weights, tuning, Lmatrix){
       warning(paste("error in network-constraint: dimension of Lmatrix doesnt match"))
       return(l)
     }
-    l2 <- apply(coef, 1, function(v)  v %*% Lmatrix %*% v)
+    l2 <- apply(coef, 1, function(v)  abs(v %*% Lmatrix %*% v))
     return(l - lambda2*sum(l2))
   }
 }
