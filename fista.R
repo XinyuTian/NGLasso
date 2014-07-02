@@ -13,6 +13,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   if(is.null(fitype)) fitype <- "ordinary"
   if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
   stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
+  tuning0 = tuning
   tuning[[1]] <- tuning[[1]] * nobs
   tuning[[2]] <- tuning[[2]] * nobs
 
@@ -163,8 +164,11 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   ind <- nvar(coefprox) # including the intercept
   if ((fitype == "refit" | fitype == "adprf") & (length(ind) != 1)) {
     if(ind[1] == 1) ind0 <- ind[-1]-1 else ind0 <- ind-1
-    newdata <- list(y=dat$y, x=dat$x[, ind], Lmatrix=Lmatrix[ind0,ind0], pwt = dat$pwt[ind])
-    out <- fista(newdata, tuning = list(0, tuning[[2]]))
+    newdata <- list(y=dat$y, x=dat$x[, ind], Lmatrix=Lmatrix[ind0,ind0], pwt = dat$pwt[ind0])
+    fitype = switch(fitype,
+                    "refit" = "ordinary",
+                    "adprf" = "adapt")
+    out <- fista(newdata, tuning = list(0, tuning0[[2]]), fitype = fitype)
     tempcoef <- matrix(0, Q, P+1)
     tempcoef[, ind] <- out$coef
     out$coef <- tempcoef
