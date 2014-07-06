@@ -138,13 +138,14 @@ excoefg.coef <- function(gc, type){
                "1se" = which(gc$lambda == gc$lambda.1se)
   )
   g1 <- gc$glmnet.fit
+  Q <- length(g1$beta)
   coef1 <-lapply(g1$beta, function(u) u[,li])
   coef1 <- unlist(coef1)
-  coef1 <- matrix(coef1, nrow=4,byrow=T)
+  coef1 <- matrix(coef1, nrow=Q,byrow=T)
   alpha=g1$a0[,li]
   coef1 <- cbind(alpha, coef1)
-  coef1 <- apply(coef1,1, function(u) u-coef1[4,])
-  coef1 <- t(coef1[,-4])
+  coef1 <- apply(coef1,1, function(u) u-coef1[Q,])
+  coef1 <- t(coef1[,-Q])
   return(coef1)
 }
 
