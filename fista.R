@@ -18,7 +18,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   tuning[[2]] <- tuning[[2]] * nobs
 
   ## initializing
-  if (is.null(coef.init)) coef.init <- matrix(1,nrow=K-1,ncol=P+1)
+  if (is.null(coef.init)) coef.init <- excoefm(dat)
   coef.old1 <- coef.init
   coef <- coef.init
   ## internally, coef must be a list, therefore:
