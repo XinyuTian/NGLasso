@@ -67,7 +67,7 @@ cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, l
       cvcore <- function(j){
         cvdat <- list(y = dat$y[-cvinds[[j]], , drop = F],
                       x = dat$x[-cvinds[[j]], , drop = F],
-                      Lmatrix = dat$Lmatrix, pwt = dat$pwt)
+                      Amatrix = dat$Amatrix, pwt = dat$pwt)
         coef <- fista(dat=cvdat, tuning=list(lambda1,lambda2), coef.init = coef.init,
                       fitype = fitype)$coef
 
