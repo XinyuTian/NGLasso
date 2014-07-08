@@ -165,7 +165,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   ind <- nvar(coefprox) # including the intercept
   if ((fitype == "refit" | fitype == "adprf") & (length(ind) != 1)) {
     if(ind[1] == 1) ind0 <- ind[-1]-1 else ind0 <- ind-1
-    newdata <- list(y=dat$y, x=dat$x[, ind], Amatrix=Amatrix[ind0,ind0], pwt = dat$pwt[ind0])
+    newdata <- list(y=dat$y, x=dat$x[, ind], Amatrix=Amatrix[ind0,ind0,drop=FALSE], pwt = dat$pwt[ind0])
     fitype = switch(fitype,
                     "refit" = "ordinary",
                     "adprf" = "adapt")
