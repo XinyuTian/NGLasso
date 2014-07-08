@@ -198,33 +198,33 @@ outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", SNR=1, 
                  )
   )
   coef <- coef*SNR
-  Lmatrix <- switch(Lmattype,
+  Amatrix <- switch(Lmattype,
                     "ideal" = switch(modsize,
-                                     "small" = crtLmat(P=20,nz=4),
-                                     "medium" = crtLmat(P=100,nz=10),
-                                     "large" = crtLmat(P=200,nz=10)
+                                     "small" = crtAmat(upper.lim=0, P=20,nz=4),
+                                     "medium" = crtAmat(upper.lim=0, P=100,nz=10),
+                                     "large" = crtAmat(upper.lim=0, P=200,nz=10)
                     ),
                     "noise" = switch(modsize,
-                                   "small" = crtLmat1(P=20,nz=4),
-                                   "medium" = crtLmat1(P=100,nz=10),
-                                   "large" = crtLmat1(P=200,nz=10)
+                                   "small" = crtAmat(upper.lim=0.25, P=20,nz=4),
+                                   "medium" = crtAmat(upper.lim=0.25, P=100,nz=10),
+                                   "large" = crtAmat(upper.lim=0.25, P=200,nz=10)
                     ),
                     "incor" = switch(modsize,
-                                     "small" = crtLmat1(Lmattype="incor",P=20,nz=4),
-                                     "medium" = crtLmat1(Lmattype="incor",P=100,nz=10),
-                                     "large" = crtLmat1(Lmattype="incor",P=200,nz=10)
+                                     "small" = crtAmat(upper.lim=0.6, P=20,nz=4),
+                                     "medium" = crtAmat(upper.lim=0.6, P=100,nz=10),
+                                     "large" = crtAmat(upper.lim=0.6, P=200,nz=10)
                     )
   )
   
   dat <- switch(modsize,
-                "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
-                "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
-                "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
+                "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Amatrix = Amatrix),
+                "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Amatrix = Amatrix),
+                "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Amatrix = Amatrix)
   )
   predat <- switch(modsize,
-                   "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Lmatrix = Lmatrix),
-                   "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Lmatrix = Lmatrix),
-                   "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Lmatrix = Lmatrix)
+                   "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Amatrix = Amatrix),
+                   "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Amatrix = Amatrix),
+                   "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Amatrix = Amatrix)
   )
   dfmax <- switch(modsize,
                   "small" = 10,
