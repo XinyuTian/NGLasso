@@ -9,7 +9,8 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   Q <- ncol(dat$y)
   K <- Q+1
   iter.count <- 0
-  Lmatrix <- getLmat(dat$Amatrix)
+  Amatrix <- dat$Amatrix
+  Lmatrix <- getLmat(Amatrix)
   if(is.null(fitype)) fitype <- "ordinary"
   if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
   stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
