@@ -8,14 +8,15 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   P <- ncol(dat$x)-1
   Q <- ncol(dat$y)
   K <- Q+1
+  if (P == 0) {warning("no predictors in the model"); return(NA)}
   iter.count <- 0
-  Lmatrix <- dat$Lmatrix
+  Lmatrix <- getLmat(dat$Amatrix)
   if(is.null(fitype)) fitype <- "ordinary"
   if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
   stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
   tuning0 = tuning
   tuning[[1]] <- tuning[[1]] * nobs
-  tuning[[2]] <- tuning[[2]] * nobs
+  tuning[[2]] <- tuning[[2]] * nobs /sum((colSums(Amatrix)+rowSums(Amatrix))!=0)
 
   ## initializing
   if (is.null(coef.init)) coef.init <- excoefm(dat)
