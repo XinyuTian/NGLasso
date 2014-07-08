@@ -26,9 +26,8 @@ repblockMatrixDiagonal <- function(matrix, rep) {
 #Lmatrix <- t(t(Lmatrix*di)*di)
 #Lmatrix <- Lmatrix %*% diag(1/diag(Lmatrix))
 
-multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix, rho = 0.5, 
+multinom.simdata <- function(nobs, P, K, Amatrix = Amatrix, rho = 0.5, 
                              coef=NULL, weights = rep(1, nobs)){
-  #  source(file="~/My R Files/NGLasso/functions.R")
   if (is.null(coef)) {
     warning(paste("coefficients are missing, random values is used"))
     #    coef1 <- rnorm(K-1)
@@ -42,7 +41,6 @@ multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix, rho = 0.5,
   X <- mvrnorm(n = nobs, mu=rep(0,P), cov)
   #  X <- matrix(rnorm(nobs*P,mean=0), nrow=nobs, ncol=P)
   X <- cbind(1,X)
-#  if(missing(Lmatrix)) Lmatrix <- diag(P); warning(paste("Lmatrix is missing, identity is used"))
   
   eta <- tcrossprod(X, coef)
   mu <- exp(eta)/(rowSums(exp(eta))+1)
@@ -65,13 +63,10 @@ multinom.simdata <- function(nobs, P, K, Lmatrix = Lmatrix, rho = 0.5,
     if(all(ysum != 0)) sane.permutation <- 1    
   }  
   y <- y[,-K]
-  ## column centered data
-  #X <- apply(X, 2, function(u) scale(u, center=T, scale=F))
-  #y <- apply(y, 2, function(u) scale(u, center=T, scale=F))
   dat <- list()
   dat$x <- X
   dat$y <- y
-  dat$Lmatrix = Lmatrix
+  dat$Amatrix = Amatrix
   dat$coef <- coef
   pwt <- getpenweights(dat)
   dat$pwt <- pwt
@@ -105,7 +100,6 @@ crtLmat <-  function (P, nz) {
   k <- P/nz
   ## !!!!!!!!!!!!! if(!is.integer(k)) stop("P is not a multiple of nz")
   Amatrix <- repblockMatrixDiagonal(matrix(1,nrow=nz,ncol=nz), rep=k)
-  #Amatrix <- repblockMatrixDiagonal(matrix(1,nrow=10,ncol=10), rep=7)
   Dmatrix <- diag(rowSums(Amatrix))
   Lmatrix <- Dmatrix -Amatrix
   di <- 1/sqrt(diag(Lmatrix))
