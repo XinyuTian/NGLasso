@@ -152,3 +152,16 @@ Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
+
+## get Lmatrix from Amatrix
+getLmat <- function(Amatrix, normalized = FALSE){
+  Dmatrix <- diag(rowSums(Amatrix))
+  Lmatrix <- Dmatrix -Amatrix
+  if (normalized == TRUE) {
+    di <- diag(Lmatrix)
+    di[which(di==0)] <- 1
+    sqdi <- 1/sqrt(di)
+    Lmatrix <- t(t(Lmatrix*sqdi)*sqdi)   
+  } 
+  return(Lmatrix)
+}
