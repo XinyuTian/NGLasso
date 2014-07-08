@@ -8,7 +8,6 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   P <- ncol(dat$x)-1
   Q <- ncol(dat$y)
   K <- Q+1
-  if (P == 0) {warning("no predictors in the model"); return(NA)}
   iter.count <- 0
   Lmatrix <- getLmat(dat$Amatrix)
   if(is.null(fitype)) fitype <- "ordinary"
