@@ -16,7 +16,7 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   stop("'fitype' should be one of 'ordinary', 'adapt', 'refit', 'adprf'")
   tuning0 = tuning
   tuning[[1]] <- tuning[[1]] * nobs
-  tuning[[2]] <- tuning[[2]] * nobs /sum((colSums(Amatrix)+rowSums(Amatrix))!=0)
+  tuning[[2]] <- tuning[[2]] * nobs
 
   ## initializing
   if (is.null(coef.init)) coef.init <- excoefm(dat)
