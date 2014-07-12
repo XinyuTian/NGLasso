@@ -39,7 +39,7 @@ multinom.simdata <- function(nobs, P, K, Amatrix = Amatrix, rho = 0.5,
   Q <- nrow(coef)
   cov <- getcov(rho=rho, P=P)
   X <- mvrnorm(n = nobs, mu=rep(0,P), cov)
-  #  X <- matrix(rnorm(nobs*P,mean=0), nrow=nobs, ncol=P)
+  Lmatrix <- getLmat(Amatrix, signed=TRUE, X=X)
   X <- cbind(1,X)
   
   eta <- tcrossprod(X, coef)
@@ -67,6 +67,7 @@ multinom.simdata <- function(nobs, P, K, Amatrix = Amatrix, rho = 0.5,
   dat$x <- X
   dat$y <- y
   dat$Amatrix = Amatrix
+  dat$Lmatrix = Lmatrix
   dat$coef <- coef
   pwt <- getpenweights(dat)
   dat$pwt <- pwt
