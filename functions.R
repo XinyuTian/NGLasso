@@ -154,14 +154,20 @@ Mode <- function(x) {
 }
 
 ## get Lmatrix from Amatrix
-getLmat <- function(Amatrix, normalized = FALSE){
+getLmat <- function(Amatrix, normalized = TRUE, signed=FALSE, X=NULL){
   Dmatrix <- diag(rowSums(Amatrix))
   Lmatrix <- Dmatrix -Amatrix
-  if (normalized == TRUE) {
+  if (normalized) {
     di <- diag(Lmatrix)
     di[which(di==0)] <- 1
     sqdi <- 1/sqrt(di)
     Lmatrix <- t(t(Lmatrix*sqdi)*sqdi)   
+  } 
+  if (signed) {
+    cov.mat <- cov(X)
+    cov.mat[which(cov.mat > 0)] <- 1
+    cov.mat[which(cov.mat < 0)] <- -1 
+    Lmatrix <- Lmatrix * cov.mat
   } 
   return(Lmatrix)
 }
