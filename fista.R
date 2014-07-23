@@ -1,5 +1,5 @@
 fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fitype = NULL, 
-                  stepsize.init = 4,  max.iter = 500, rel.tol = 1e-6, worsen.max=20)
+                  stepsize.init = 4,  max.iter = 500, rel.tol = 1e-6, worsen.max=20, signed.Lmat=FALSE)
 {
 #  sancheck <- model@sancheck
 #  environment(sancheck) <- sys.frame(sys.nframe())
@@ -10,10 +10,11 @@ fista <- function(dat, weights=rep(1,nrow(dat$y)), tuning, coef.init=NULL, fityp
   K <- Q+1
   iter.count <- 0
   Amatrix <- dat$Amatrix
+  if(!is.null(dat$signed.Lmat)) signed.Lmat <- dat$signed.Lmat
   if(!is.null(dat$Lmatrix)) {
     Lmatrix <- dat$Lmatrix 
   } else if (P>1) {
-    Lmatrix <- getLmat(Amatrix, signed=TRUE, X=dat$x[,-1, drop=FALSE]) 
+    Lmatrix <- getLmat(Amatrix, signed=signed.Lmat, X=dat$x[,-1, drop=FALSE]) 
   } else Lmatrix <- getLmat(Amatrix) 
   if(is.null(fitype)) fitype <- "ordinary"
   if(fitype!="ordinary" & fitype!="adapt" & fitype!="refit" & fitype!="adprf") 
