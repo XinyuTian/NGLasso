@@ -71,6 +71,7 @@ multinom.simdata <- function(nobs, P, K, Amatrix = Amatrix, rho = 0.5,
   dat$coef <- coef
   pwt <- getpenweights(dat)
   dat$pwt <- pwt
+  dat$signed.Lmat <- FALSE
   return(dat)
 }
 
