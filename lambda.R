@@ -44,7 +44,7 @@ getlambdamax <- function(dat, weights = NULL, fitype = "ordinary")
   mu0 <- updated$mu
   
   ## the gradient based on the model where all the penalized parameters are 0
-  grad0 <- gradient(dat = dat, mu = mu0, weights = weights)[,-1]
+  grad0 <- gradient(dat = dat, mu = mu0, weights = weights)[,-1, drop=FALSE]
   
   ## now the norms of the gradient of the penalized groups, based on the null model.
   gradnorms.x <- apply(grad0, 2, function(v) {norm(as.matrix(v), type="f")})
