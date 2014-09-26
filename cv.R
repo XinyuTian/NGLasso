@@ -37,7 +37,7 @@ cv <- function(dat, k = 10, dfmax=NULL, crt.measure = "brier", lambdaseq=NULL, l
     ## test if all columns of y have samples in each training set
     sane.flag <- numeric(k)
     for(i in seq(k)){
-      daty.test <- dat$y[-cvinds[[i]], ]
+      daty.test <- dat$y[-cvinds[[i]], , drop=FALSE]
       daty.test <- cbind(daty.test, 1 - rowSums(daty.test))
       if(all(colSums(daty.test) >= 1)) sane.flag[i] <- T
     }
