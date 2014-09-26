@@ -18,7 +18,7 @@ ploglik = function(y, mu, coef, weights, tuning, Lmatrix){
   }
   l <- loglik(y, mu, weights) 
   if (lambda2==0) return(l)  else {
-    coef <- as.matrix(coef[,-1])
+    coef <- coef[,-1, drop=FALSE]
     Lmatrix <- as.matrix(Lmatrix)
     if (ncol(coef)!=ncol(Lmatrix) | ncol(coef)!=nrow(Lmatrix)) {
       warning(paste("error in network-constraint: dimension of Lmatrix doesnt match"))
@@ -45,7 +45,7 @@ pgradient <- function(dat, mu, coef, weights, tuning, Lmatrix){
   }
   g <- gradient(dat, mu, weights)
   if (lambda2==0) return(g)  else {
-    coef <- as.matrix(coef[,-1])
+    coef <- coef[,-1, drop=FALSE]
     Lmatrix <- as.matrix(Lmatrix)
     if (ncol(coef)!=ncol(Lmatrix) | ncol(coef)!=nrow(Lmatrix)) {
       warning(paste("error in network-constraint: dimension of Lmatrix doesnt match"))
@@ -86,7 +86,7 @@ tresh <- function(u, lambda){
 }
 ## the solution to the optimization problem
 fistaProximal <- function(coef, tuning, penweights){
-  coef1 <- as.matrix(coef[,-1])
+  coef1 <- coef[,-1, drop=FALSE]
   coefw <- sweep(coef1, 2, penweights, '/')
   soft <- apply(coefw, 2, tresh, lambda=tuning[[1]])
   coef1 <- sweep(coef1, 2, soft, '*')
@@ -98,7 +98,7 @@ penalty <- function(coef, tuning, Q, penweights){
   if(!is.matrix(coef)){
     coef <- matrix(coef, nrow=Q)
   }
-  coef <- as.matrix(coef[,-1])
+  coef <- coef[,-1, drop=FALSE]
   coef <- sweep(coef, 2, penweights, `*`)
   J1 <- sum(apply(as.matrix(coef), 2, function(u) norm(as.matrix(u),"F")))
   return(tuning[[1]] * J1)
