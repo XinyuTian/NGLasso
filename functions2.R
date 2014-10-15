@@ -179,53 +179,35 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", SNR=1, lambda2seq, type="1se") {
+outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", SNR=1, 
+                    covtype="blockwise", rho=0.5, lambda2seq, type="1se") {
+  P <- switch(modsize,
+                  "small" = 20,
+                  "medium" = 100,
+                  "large" = 200
+  )
+  nz <- switch(modsize,
+                  "small" = 4,
+                  "medium" = 10,
+                  "large" = 10
+  )
   coef <- switch(coeftype,
-                 "ideal" = switch(modsize,
-                                  "small" = crtcoef(P=20,nz=4),
-                                  "medium" = crtcoef(P=100,nz=10),
-                                  "large" = crtcoef(P=200,nz=10)
-                 ),
-                 "simil" = switch(modsize,
-                                  "small" = crtcoef1(P=20,nz=4),
-                                  "medium" = crtcoef1(P=100,nz=10),
-                                  "large" = crtcoef1(P=200,nz=10)
-                 ),
-                 "randm" = switch(modsize,
-                                  "small" = crtcoef2(P=20,nz=4),
-                                  "medium" = crtcoef2(P=100,nz=10),
-                                  "large" = crtcoef2(P=200,nz=10)
-                 )
+                 "ideal" = crtcoef(P=P,nz=nz),
+                 "simil" = crtcoef1(P=P,nz=nz),
+                 "randm" = crtcoef2(P=P,nz=nz)
   )
   coef <- coef*SNR
+  cov <- switch(covtype,
+                 "AR" = getcov(rho=rho, P=P),
+                 "blockwise" = crtBlockWiseCov(P=P,nz=nz, rho=rho)
+  )
   Amatrix <- switch(Lmattype,
-                    "ideal" = switch(modsize,
-                                     "small" = crtAmat(upper.lim=0, P=20,nz=4),
-                                     "medium" = crtAmat(upper.lim=0, P=100,nz=10),
-                                     "large" = crtAmat(upper.lim=0, P=200,nz=10)
-                    ),
-                    "noise" = switch(modsize,
-                                   "small" = crtAmat(upper.lim=0.25, P=20,nz=4),
-                                   "medium" = crtAmat(upper.lim=0.25, P=100,nz=10),
-                                   "large" = crtAmat(upper.lim=0.25, P=200,nz=10)
-                    ),
-                    "incor" = switch(modsize,
-                                     "small" = crtAmat(upper.lim=0.6, P=20,nz=4),
-                                     "medium" = crtAmat(upper.lim=0.6, P=100,nz=10),
-                                     "large" = crtAmat(upper.lim=0.6, P=200,nz=10)
-                    )
+                    "ideal" = crtAmat(upper.lim=0, P=P,nz=nz),
+                    "noise" = crtAmat(upper.lim=0.25, P=P,nz=nz),
+                    "incor" = crtAmat(upper.lim=0.6, P=P,nz=nz)
   )
-  
-  dat <- switch(modsize,
-                "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Amatrix = Amatrix),
-                "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Amatrix = Amatrix),
-                "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Amatrix = Amatrix)
-  )
-  predat <- switch(modsize,
-                   "small" = multinom.simdata(nobs = 200, P = 20, K = 4, coef = coef, Amatrix = Amatrix),
-                   "medium" = multinom.simdata(nobs = 200, P = 100, K = 4, coef = coef, Amatrix = Amatrix),
-                   "large" = multinom.simdata(nobs = 200, P = 200, K = 4, coef = coef, Amatrix = Amatrix)
-  )
+  dat <- multinom.simdata(nobs = 200, P = P, K = 4, coef = coef, cov=cov, Amatrix = Amatrix)
+  predat <- multinom.simdata(nobs = 200, P = P, K = 4, coef = coef, cov=cov, Amatrix = Amatrix)
   dfmax <- switch(modsize,
                   "small" = 10,
                   "medium" = 50,
