@@ -100,30 +100,6 @@ crtcoef2 <- function (K=4, P, nz) {
   return(coef)
 }
 
-crtLmat <-  function (P, nz) {
-  k <- P/nz
-  ## !!!!!!!!!!!!! if(!is.integer(k)) stop("P is not a multiple of nz")
-  Amatrix <- repblockMatrixDiagonal(matrix(1,nrow=nz,ncol=nz), rep=k)
-  Dmatrix <- diag(rowSums(Amatrix))
-  Lmatrix <- Dmatrix -Amatrix
-  di <- 1/sqrt(diag(Lmatrix))
-  Lmatrix <- t(t(Lmatrix*di)*di)  
-  return(Lmatrix)
-}
-
-crtLmat1 <- function(Lmattype="noise", P, nz) {
-  upper.lim <- switch(Lmattype,
-                      "noise"=0.25,
-                      "incor"=0.6
-                      )
-  Amatrix <- crtAmat(upper.lim, P, nz)
-  Dmatrix <- diag(rowSums(Amatrix))
-  Lmatrix <- Dmatrix -Amatrix
-  di <- 1/sqrt(diag(Lmatrix))
-  Lmatrix <- t(t(Lmatrix*di)*di)  
-  return(Lmatrix)
-}
-
 crtAmat <- function(upper.lim, P, nz) {
   lower.lim <- 1-upper.lim
   k <- P / nz
