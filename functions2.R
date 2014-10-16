@@ -179,7 +179,7 @@ excoefm <- function(dat) {
 }
 
 ## input the type of data to be simulated, simulate a group of data, gives output
-outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", SNR=1, 
+outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", overlap=5, SNR=1, 
                     covtype="blockwise", rho=0.5, lambda2seq, type="1se") {
   P <- switch(modsize,
                   "small" = 20,
@@ -204,8 +204,13 @@ outfct <- function (modsize="small", coeftype="ideal", Lmattype="ideal", SNR=1,
   Amatrix <- switch(Lmattype,
                     "ideal" = crtAmat(upper.lim=0, P=P,nz=nz),
                     "noise" = crtAmat(upper.lim=0.25, P=P,nz=nz),
-                    "incor" = crtAmat(upper.lim=0.6, P=P,nz=nz)
+                    "incor" = crtAmat(upper.lim=0.6, P=P,nz=nz),
+                    "overlap" = crtOverlapAmat(P=P, nz=nz, overlap=overlap)
   )
+  if (Lmattype == "overlap") {
+    coef[, (P-nz/2+2):(P+1)] = coef[, (nz/2+2):(nz+1)]
+    coef[, (nz/2+2):(nz+1)] = 0 
+  }
   dat <- multinom.simdata(nobs = 200, P = P, K = 4, coef = coef, cov=cov, Amatrix = Amatrix)
   predat <- multinom.simdata(nobs = 200, P = P, K = 4, coef = coef, cov=cov, Amatrix = Amatrix)
   dfmax <- switch(modsize,
