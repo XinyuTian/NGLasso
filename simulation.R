@@ -112,6 +112,17 @@ crtAmat <- function(upper.lim, P, nz) {
   return(Amatrix)
 }
 
+crtOverlapAmat <- function(P, nz, overlap=5) {
+  k <- P / nz
+  Amatrix <- matrix(0, nrow=P, ncol=P)
+  for (i in seq(k)) {
+    ind <- ((i-1)*nz+1) : (i*nz+overlap)
+    ind <- ind[ind<=P]
+    Amatrix[ind, ind] <- 1
+  }
+  return(Amatrix)
+}
+
 crtBlockWiseCov <- function(P, nz, rho) {
   k <- P/nz
   ## !!!!!!!!!!!!! if(!is.integer(k)) stop("P is not a multiple of nz")
