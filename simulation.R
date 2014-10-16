@@ -27,7 +27,7 @@ repblockMatrixDiagonal <- function(matrix, rep) {
 #Lmatrix <- Lmatrix %*% diag(1/diag(Lmatrix))
 
 multinom.simdata <- function(nobs, P, K, Amatrix = Amatrix, rho = 0.5, 
-                             coef=NULL, weights = rep(1, nobs)){
+                             coef=NULL, cov=NULL, weights = rep(1, nobs)){
   if (is.null(coef)) {
     warning(paste("coefficients are missing, random values is used"))
     #    coef1 <- rnorm(K-1)
@@ -37,7 +37,9 @@ multinom.simdata <- function(nobs, P, K, Amatrix = Amatrix, rho = 0.5,
     coef <- cbind(rnorm(K-1), coef)
   }
   Q <- nrow(coef)
-  cov <- getcov(rho=rho, P=P)
+  if (is.null(cov)) {
+    cov <- getcov(rho=rho, P=P)
+  }
   X <- mvrnorm(n = nobs, mu=rep(0,P), cov)
   Lmatrix <- getLmat(Amatrix, signed=TRUE, X=X)
   X <- cbind(1,X)
@@ -132,4 +134,13 @@ crtAmat <- function(upper.lim, P, nz) {
   Amatrix <- forceSymmetric(m.sum)
   diag(Amatrix) <- 1
   return(Amatrix)
+}
+
+crtBlockWiseCov <- function(P, nz, rho) {
+  k <- P/nz
+  ## !!!!!!!!!!!!! if(!is.integer(k)) stop("P is not a multiple of nz")
+  m.block <- matrix(rho, nrow=nz, ncol=nz)
+  diag(m.block) <- 1
+  cov <- repblockMatrixDiagonal(m.block, k)
+  return(cov)
 }
