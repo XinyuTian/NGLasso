@@ -100,6 +100,13 @@ crtcoef2 <- function (K=4, P, nz) {
   return(coef)
 }
 
+## switch the first nz columns with the following nz/2 columns
+switchCoef <- function(coef, P, nz) {
+  coef[ , (nz+2):(nz*3/2+1)] <- coef[ , 2:(nz/2+1)]
+  coef[ , 2:(nz/2+1)] <- 0
+  return(coef)
+}
+
 crtAmat <- function(upper.lim, P, nz) {
   lower.lim <- 1-upper.lim
   k <- P / nz
